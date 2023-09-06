@@ -100,24 +100,24 @@ public class Scanner {
     }
 
     public boolean continueScan(Token scannedToken) {
-        return scannedToken.getToken() != -1 && scannedToken.getToken() != 10;
+        return scannedToken.getOpCode() != -1 && scannedToken.getOpCode() != 10;
     }
 
     public void scanFile() {
         this.skipWhitespace();
         Token prevToken = new Token(-1, "null", -1);
-        while (prevToken.getToken() != 9) {
+        while (prevToken.getOpCode() != 9) {
             prevToken = scanNextWord();
             // if new line or carriage we move to new line
-            if (prevToken.getToken() == 10) {
+            if (prevToken.getOpCode() == 10) {
                 nextLine();
             }
-            if (prevToken.getToken() == 9) {
+            if (prevToken.getOpCode() == 9) {
                 System.out.println("Scanning complete");
                 break;
             }
-            if (prevToken.getToken() != -1) {
-                System.out.println("SCANNED TOKEN: Line " + prevToken.getLineNum() + " " + prevToken.getLexeme() + " " + prevToken.getToken());
+            if (prevToken.getOpCode() != -1) {
+                System.out.println("SCANNED TOKEN: Line " + prevToken.getLineNum() + " " + prevToken.getLexeme() + " " + prevToken.getOpCode());
             }
         }
     }

@@ -99,7 +99,7 @@ public class IntermediateNode {
 
     @Override
     public String toString() {
-        return "[" + lineNum + " ," + IntermediateList.tokenConversion[opCode] + " " + genterateOperandStringArray() + "]";
+        return "[" + lineNum + " ," + IntermediateList.tokenConversion[opCode] + " " + generateOperandStringArray() + "]";
     }
 
     public String getILOCRepresentation() {
@@ -118,13 +118,13 @@ public class IntermediateNode {
         }
     }
 
-    private String genterateOperandStringArray() {
-        String sb = "[";
-        for (int i = 0; i < operandArray.length; i++) {
-            if (operandArray[i] == -1) {
-                sb += "null, ";
+    private String generateOperandStringArray() {
+        StringBuilder sb = new StringBuilder("[");
+        for (int elem : operandArray) {
+            if (elem == -1) {
+                sb.append("null, ");
             } else {
-                sb += operandArray[i] + ", ";
+                sb.append(elem).append(", ");
             }
         }
         return sb + "]";
