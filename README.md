@@ -1,1 +1,2 @@
-# comp412_hw1
+//NAME: Bo Sung Kim
+//NETID: bk39
