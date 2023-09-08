@@ -11,8 +11,22 @@ public class Parser {
     private Token currToken;
     private int lineNum = 1;
     private int maxSourceReg = 0;
-    private int errorFlag = 0;
+    private int errorCount = 0;
     public static Map<String, Integer> tokenConversion =  new HashMap<>();
+
+    public static final int MEMOP = 0;
+    public static final int LOADI = 1;
+    public static final int ARITHOP = 2;
+    public static final int OUTPUT = 3;
+    public static final int NOP = 4;
+    public static final int CONSTANT = 5;
+    public static final int REGISTER = 6;
+    public static final int COMMA = 7;
+    public static final int INTO = 8;
+    public static final int EOF = 9;
+    public static final int EOL = 10;
+    public static final int REG = 11;
+
     public Parser(Scanner scanner) {
         tokenConversion.put("MEMOP", 0);
         tokenConversion.put("LOADI", 1);
@@ -32,16 +46,43 @@ public class Parser {
 
     public int parse() {
         currToken = scanner.scanNextWord();
-        while (currToken.getOpCode() != 9) {
+        while (currToken.getOpCode() != EOF) {
             switch (currToken.getOpCode()) {
-                case 0:
+                case MEMOP:
                     finishMEMOP();
+                    break;
+                case LOADI:
+                    finishLOADI();
+                    break;
+                case ARITHOP:
+                    finishARITHOP();
+                    break;
+                case OUTPUT:
+                    finishOUTPUT();
+                    break;
+                case NOP:
+                    finishNOP();
+                    break;
+                default:
+                    System.out.println("ERROR " + this.lineNum + ": Invalid ILOC opcode " + currToken.getOpCode());
+
             }
+            // scan next and handle EOF
+            currToken = scanner.scanNextWord();
         }
+        return errorCount;
+    }
+
+    public void printIR() {
+        System.out.println(this.IRList);
     }
 
     public void handleFaultyIR(int currLex, int prevLex, int opcode) {
+        errorCount += 1;
         System.out.println("ERROR: There was no " + IntermediateList.tokenConversion[currLex] + " following " + IntermediateList.tokenConversion[prevLex] + "for opCode " + IntermediateList.tokenConversion[opcode]);
+        while (this.currToken.getOpCode()!= EOL) {
+            this.currToken = scanner.scanNextWord();
+        }
     }
     private void finishMEMOP() {
         String lexeme = currToken.getLexeme();
@@ -55,7 +96,7 @@ public class Parser {
                 if (currToken.getOpCode() == 11) {
                     newNode.setSourceRegister(1, Integer.parseInt(currToken.getLexeme()));
                     currToken = scanner.scanNextWord();
-                    if (currToken.getOpCode() == 10) {
+                    if (currToken.getOpCode() == EOL || currToken.getOpCode() == EOF) {
                         IRList.append(newNode);
                     } else {
                         handleFaultyIR(10, 11, currToken.getOpCode());
@@ -89,7 +130,7 @@ public class Parser {
                     // register
                     newNode.setSourceRegister(1, Integer.parseInt(currToken.getLexeme()));
                     currToken = scanner.scanNextWord();
-                    if (currToken.getOpCode() == 10) {
+                    if (currToken.getOpCode() == EOL || currToken.getOpCode() == EOF) {
                         // eol
                         IRList.append(newNode);
                     } else {
@@ -109,6 +150,65 @@ public class Parser {
             // printCustomErrorMsg("There was no constant following the LOADI operation");
         }
 
+    }
+
+    private void finishARITHOP() {
+        IntermediateNode newNode = new IntermediateNode(this.lineNum, ARITHOP, currToken.getLexeme());
+        currToken = scanner.scanNextWord();
+        if (currToken.getOpCode() == REGISTER) {
+            newNode.setSourceRegister(0, Integer.parseInt(currToken.getLexeme()));
+            currToken = scanner.scanNextWord();
+            if (currToken.getOpCode() == COMMA) {
+                if (currToken.getOpCode() == REGISTER) {
+                    newNode.setSourceRegister(1, Integer.parseInt(currToken.getLexeme()));
+                    currToken = scanner.scanNextWord();
+                    if (currToken.getOpCode() == INTO) {
+                        if (currToken.getOpCode() == REGISTER) {
+                            newNode.setSourceRegister(2, Integer.parseInt(currToken.getLexeme()));
+                            currToken = scanner.scanNextWord();
+                            if (currToken.getOpCode() == EOL || currToken.getOpCode() == EOF) {
+                                IRList.append(newNode);
+                            } else {
+                                handleFaultyIR(EOL, REGISTER, ARITHOP);
+                            }
+                        } else {
+                            handleFaultyIR(REGISTER, INTO, ARITHOP);
+                        }
+                    } else {
+                        handleFaultyIR(INTO, REGISTER, ARITHOP);
+                    }
+                } else {
+                    handleFaultyIR(REGISTER, COMMA, ARITHOP);
+                }
+            } else {
+                handleFaultyIR(COMMA, REGISTER, ARITHOP);
+            }
+        } else {
+            handleFaultyIR(REGISTER, ARITHOP, ARITHOP);
+        }
+
+    }
+
+    private void finishOUTPUT() {
+        IntermediateNode newNode = new IntermediateNode(this.lineNum, OUTPUT, currToken.getLexeme());
+        currToken = scanner.scanNextWord();
+        if (currToken.getOpCode() == CONSTANT) {
+            if (currToken.getOpCode() == EOL || currToken.getOpCode() == EOF) {
+                IRList.append(newNode);
+            } else {
+                handleFaultyIR(EOL, OUTPUT, OUTPUT);
+            }
+        }
+    }
+
+    private void finishNOP() {
+        IntermediateNode newNode = new IntermediateNode(this.lineNum, NOP, currToken.getLexeme());
+        currToken = scanner.scanNextWord();
+        if (currToken.getOpCode() == EOL || currToken.getOpCode() == EOF) {
+            IRList.append(newNode);
+        } else {
+            handleFaultyIR(EOL, NOP, NOP);
+        }
     }
 
 

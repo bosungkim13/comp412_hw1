@@ -116,9 +116,9 @@ public class Scanner {
                 System.out.println("Scanning complete");
                 break;
             }
-            if (prevToken.getOpCode() != -1) {
+//            if (prevToken.getOpCode() != -1) {
                 System.out.println("SCANNED TOKEN: Line " + prevToken.getLineNum() + " " + prevToken.getLexeme() + " " + prevToken.getOpCode());
-            }
+//            }
         }
     }
 
@@ -162,12 +162,16 @@ public class Scanner {
             // new line!
             this.lexeme = "EOL";
             this.token = 10;
+            success = true;
         }
         else {
             success = false;
             this.lexeme = "ERROR: Invalid starting character of ILOC language";
             this.token = -1;
-            skipToNextToken();
+//            skipToNextToken();
+        }
+        if (!success) {
+            nextLine();
         }
         return new Token(this.token, this.lexeme, this.lineNum);
     }
@@ -202,7 +206,7 @@ public class Scanner {
         skipUntilWhitespace(1);
         skipWhitespace();
     }
-    public void openFile() {
+    public boolean openFile() {
         try {
             this.reader = new BufferedReader(new FileReader(this.filename));
             this.currLine = this.reader.readLine();
@@ -212,10 +216,13 @@ public class Scanner {
         } catch (FileNotFoundException e) {
             System.out.println("ERROR: Could not open file" + this.filename);
             System.out.println(e.getMessage());
+            return false;
         } catch (IOException e) {
             System.out.println("ERROR: Could not read file" + this.filename);
             System.out.println(e.getMessage());
+            return false;
         }
+        return true;
     }
 
     public boolean finishValidWord(String lexeme, int token) {
@@ -257,7 +264,7 @@ public class Scanner {
     }
 
     public boolean finishInvalidWord(char prevChar) {
-        System.out.println("ERROR: Invalid character followed by '" + prevChar + "'");
+        System.out.println("ERROR " + this.lineNum + ": Invalid character followed by '" + prevChar + "'");
         this.lexeme = "Invalid character followed by '" + prevChar + "'";
         this.token = -1;
         skipToNextToken();
@@ -363,9 +370,9 @@ public class Scanner {
 
     public boolean handleDigit(int token) {
         StringBuilder builder = new StringBuilder();
-        if (token == 6) {
-            builder.append('r');
-        }
+//        if (token == 6) {
+//            builder.append('r');
+//        }
         while (this.currChar <= '9' && this.currChar >= '0') {
             builder.append(this.currChar);
             if (!moveNextChar()) {
@@ -452,9 +459,9 @@ public class Scanner {
             this.lineNum += 1;
             return true;
         } catch (IOException e) {
-            System.out.println("ERROR: Faulty file. Cannot read next line");
+            System.out.println("ERROR " + this.lineNum + ": Faulty file. Cannot read next line");
             System.out.println(e.getMessage());
-            return  false;
+            return false;
         }
 
     }

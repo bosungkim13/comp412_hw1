@@ -52,26 +52,56 @@ public class Main {
      * - r <name> ----> read file specified by name and print out the IR
      */
     public static void main(String[] args) {
-        args = new String[] {"-s", "src/tests/test01.txt"};
+        args = new String[] {"-p", "src/tests/test02.txt"};
         String[] parsedArgs = parseFlag(args);
+        int error;
+        Scanner scanner;
+        Parser parser;
         switch (parsedArgs[0]) {
             case H_FLAG:
                 commandHelp();
                 break;
             case R_FLAG:
                 // print IR
+                scanner = new Scanner(parsedArgs[1]);
+                if (!scanner.openFile()) {
+                    return;
+                }
+                parser = new Parser(scanner);
+                error = parser.parse();
+                handleParseReturn(error, parsedArgs[1]);
+                if (error == 0) {
+                    parser.printIR();
+                }
                 break;
             case P_FLAG:
                 // return IR success or failure
+                scanner = new Scanner(parsedArgs[1]);
+                if (!scanner.openFile()) {
+                    return;
+                }
+                parser = new Parser(scanner);
+                error = parser.parse();
+                handleParseReturn(error, parsedArgs[1]);
                 break;
             case S_FLAG:
                 // scan and print
-                Scanner scanner = new Scanner(parsedArgs[1]);
-                scanner.openFile();
+                scanner = new Scanner(parsedArgs[1]);
+                if (!scanner.openFile()) {
+                    return;
+                }
                 scanner.scanFile();
                 break;
         }
 
+    }
+
+    private static void handleParseReturn(int errorCount, String fileName) {
+        if (errorCount == 0) {
+            System.out.println("Parser successfully parsed " + fileName);
+        } else {
+            System.out.println("Parser found " + errorCount + " errors while parsing " + fileName);
+        }
     }
 
     private static String[] parseFlag(String[] args) {

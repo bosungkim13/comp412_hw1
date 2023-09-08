@@ -9,29 +9,42 @@
 #|-- Parser.java
 #|-- Scanner.java
 
-# Defining variables
-JAVAC = javac
-JAVA = java
+# Makefile for a Java 8 project with your structure
 
-# Finding all the Java files in the current directory and its subdirectories
-SOURCE_FILES = $(shell find . -name "*.java")
-CLASS_FILES = $(SOURCE_FILES:.java=.class)
+# Variables
+SRC_DIR := src
+BIN_DIR := bin
+JAR_NAME := MyProject.jar
+MAIN_CLASS := Main
+CLASSPATH := .
+
+# Create list of sources and corresponding class files
+SRCS := $(shell find $(SRC_DIR) -name "*.java")
+CLASSES := $(SRCS:$(SRC_DIR)/%.java=$(BIN_DIR)/%.class)
 
 # Targets
-all: build
 
-build: compile
+default: build
 
-compile: $(CLASS_FILES)
+# Compile .java files to .class files
+build: $(BIN_DIR)
+	javac -d $(BIN_DIR) -cp $(CLASSPATH) $(SRCS)
 
-%.class: %.java
-	$(JAVAC) $<
+$(BIN_DIR):
+	mkdir -p $(BIN_DIR)
 
-run: build
-	$(JAVA) -cp src Main $(ARGS)
+# Create a JAR
+jar: build
+	jar cvfe $(JAR_NAME) $(MAIN_CLASS) -C $(BIN_DIR) .
 
+# Clean .class files and JAR
 clean:
-	find . -name "*.class" -exec rm {} +
+	rm -rf $(BIN_DIR)
+	rm -f $(JAR_NAME)
+
+.PHONY: build jar clean
+
+
 
 
 
