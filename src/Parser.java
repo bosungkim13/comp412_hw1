@@ -63,6 +63,8 @@ public class Parser {
                 case NOP:
                     finishNOP();
                     break;
+                case EOL:
+                    scanner.nextLine();
                 default:
                     System.out.println("ERROR " + this.lineNum + ": Invalid ILOC opcode " + currToken.getOpCode());
 
@@ -79,7 +81,7 @@ public class Parser {
 
     public void handleFaultyIR(int currLex, int prevLex, int opcode) {
         errorCount += 1;
-        System.out.println("ERROR: There was no " + IntermediateList.tokenConversion[currLex] + " following " + IntermediateList.tokenConversion[prevLex] + "for opCode " + IntermediateList.tokenConversion[opcode]);
+        System.out.println("ERROR: There was no " + IntermediateList.tokenConversion[currLex] + " following " + IntermediateList.tokenConversion[prevLex] + " for opCode " + IntermediateList.tokenConversion[opcode]);
         while (this.currToken.getOpCode()!= EOL) {
             this.currToken = scanner.scanNextWord();
         }

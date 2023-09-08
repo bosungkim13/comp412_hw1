@@ -8,8 +8,6 @@ public class IntermediateNode {
     private IntermediateNode next;
     private IntermediateNode prev;
     private int lineNum;
-    private static final int USE = 1;
-    private static final int DEF = 2;
     private int opCode;
     private String lexeme;
     private int operandArray[];
@@ -22,15 +20,6 @@ public class IntermediateNode {
         Arrays.setAll(operandArray, i -> -1);
         this.useDef = new int[3];
         Arrays.setAll(useDef, i -> -1);
-    }
-
-    public void setUse(int operandNum) {
-        // set the use
-        this.useDef[operandNum] = USE;
-    }
-
-    public void setDef(int operandNum) {
-        this.useDef[operandNum] = DEF;
     }
 
 
@@ -49,30 +38,6 @@ public class IntermediateNode {
         prev = p;
     }
 
-    public int getLineNum() {
-        return lineNum;
-    }
-
-    public void setLineNum(int lineNum) {
-        this.lineNum = lineNum;
-    }
-
-    public int getOpCode() {
-        return opCode;
-    }
-
-    public void setOpCode(int opCode) {
-        this.opCode = opCode;
-    }
-
-    public int[] getOperandArray() {
-        return operandArray;
-    }
-
-    public int getOperand(int position) {
-        return operandArray[position];
-    }
-
     public void setSourceRegister(int operandNum, int value) {
         this.operandArray[operandNum * 4] = value;
     }
@@ -80,17 +45,6 @@ public class IntermediateNode {
     // 0 indexed
     public int getSourceRegister(int operandNum) {
         return this.operandArray[operandNum * 4];
-    }
-
-    public void setVirtualRegister(int operandNum, int value) {
-        this.operandArray[(operandNum * 4) + 1] = value;
-    }
-
-    public void setNextUseRegister(int operandNum, int value) {
-        this.operandArray[(operandNum * 4) + 3] = value;
-    }
-    public void setOperandArray(int position, int value) {
-        this.operandArray[position] = value;
     }
 
     public int getVirtualRegister(int operandNum) {
@@ -130,35 +84,4 @@ public class IntermediateNode {
         return sb + "]";
     }
 
-    public String getLexeme() {
-        return this.lexeme;
-    }
-
-    public void setPhysicalRegister(int operand, int physicalReg) {
-        this.operandArray[(4 * operand) + 2] = physicalReg;
-    }
-
-    public int getnextUse(int operand) {
-        return this.operandArray[(4 * operand) + 3];
-    }
-
-    public int getPhysicalRegister(int i) {
-        return this.operandArray[(4 * i) + 2];
-    }
-
-    public String getPRrep() {
-        if (this.opCode == 2) {
-            return this.lexeme + "  r" + this.getPhysicalRegister(0) + ", r"
-                    + this.getPhysicalRegister(1)
-                    + " => r" + this.getPhysicalRegister(2);
-        } else if (this.opCode == 1) {
-            return this.lexeme + " " + this.getSourceRegister(0) + " => r" + this.getPhysicalRegister(1);
-        } else if (this.opCode == 0) {
-            return this.lexeme + " r" + this.getPhysicalRegister(0) + " => r" + this.getPhysicalRegister(1);
-        } else if (this.opCode == 3){
-            return this.lexeme + " " + this.getSourceRegister(0);
-        } else {
-            return this.lexeme;
-        }
-    }
 }

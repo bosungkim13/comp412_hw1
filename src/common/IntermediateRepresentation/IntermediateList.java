@@ -62,15 +62,6 @@ public class IntermediateList {
         return toReturn.toString();
     }
 
-    public String getPRCode() {
-        StringBuilder toReturn = new StringBuilder();
-        IntermediateNode currNode = head.getNext();
-        while(currNode != tail && currNode != null) {
-            toReturn.append(currNode.getPRrep()).append("\n");
-            currNode = currNode.getNext();
-        }
-        return toReturn.toString();
-    }
 
     public IntermediateNode getHead() {
         return this.head;
