@@ -167,6 +167,7 @@ public class Scanner {
             success = false;
             this.lexeme = "ERROR: Invalid starting character of ILOC language";
             this.token = -1;
+            System.out.println("ERROR " + this.lineNum + ": " + "'" + this.currChar + "'" + " is not a valid starting character of ILOC");
 //            skipToNextToken();
         }
         if (!success) {
@@ -256,7 +257,8 @@ public class Scanner {
             // invalid digit
             this.lexeme = "Invalid character" + this.currChar + " following number " + lexeme;
             this.token = -1;
-            skipToNextToken();
+//            skipToNextToken();
+            nextLine();
             return false;
         }
 
@@ -266,7 +268,8 @@ public class Scanner {
         System.out.println("ERROR " + this.lineNum + ": Invalid character followed by '" + prevChar + "'");
         this.lexeme = "Invalid character followed by '" + prevChar + "'";
         this.token = -1;
-        skipToNextToken();
+//        skipToNextToken();
+        nextLine();
         return false;
     }
     public boolean handleA() {
