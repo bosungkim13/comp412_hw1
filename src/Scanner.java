@@ -115,9 +115,9 @@ public class Scanner {
                 System.out.println("Scanning complete");
                 break;
             }
-//            if (prevToken.getOpCode() != -1) {
+            if (prevToken.getOpCode() != -1) {
                 System.out.println("SCANNED TOKEN: Line " + prevToken.getLineNum() + " " + prevToken.getLexeme() + " " + prevToken.getOpCode());
-//            }
+            }
         }
     }
 
