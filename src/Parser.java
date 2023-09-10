@@ -65,6 +65,7 @@ public class Parser {
                     break;
                 case EOL:
                     scanner.nextLine();
+                    break;
                 default:
                     System.out.println("ERROR " + this.lineNum + ": Invalid ILOC opcode " + currToken.getOpCode());
 

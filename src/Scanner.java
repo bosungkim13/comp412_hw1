@@ -111,8 +111,7 @@ public class Scanner {
             // if new line or carriage we move to new line
             if (prevToken.getOpCode() == 10) {
                 nextLine();
-            }
-            if (prevToken.getOpCode() == 9) {
+            } else if (prevToken.getOpCode() == 9) {
                 System.out.println("Scanning complete");
                 break;
             }

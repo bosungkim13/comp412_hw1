@@ -14,7 +14,7 @@
 # Variables
 SRC_DIR := src
 BIN_DIR := bin
-JAR_NAME := MyProject.jar
+JAR_NAME := lab1.jar
 MAIN_CLASS := Main
 CLASSPATH := .
 
@@ -27,14 +27,14 @@ CLASSES := $(SRCS:$(SRC_DIR)/%.java=$(BIN_DIR)/%.class)
 default: build
 
 # Compile .java files to .class files
-build: $(BIN_DIR)
+build0: $(BIN_DIR)
 	javac -d $(BIN_DIR) -cp $(CLASSPATH) $(SRCS)
 
 $(BIN_DIR):
 	mkdir -p $(BIN_DIR)
 
 # Create a JAR
-jar: build
+build: build0
 	jar cvfe $(JAR_NAME) $(MAIN_CLASS) -C $(BIN_DIR) .
 
 # Clean .class files and JAR
