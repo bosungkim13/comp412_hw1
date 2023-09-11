@@ -460,7 +460,13 @@ public class Scanner {
             }
             this.currPos = 0;
             this.lineNum += 1;
-            this.currChar = this.currLine.charAt(this.currPos);
+            try {
+                this.currChar = this.currLine.charAt(this.currPos);
+            } catch (Exception e) {
+                // We new line into an empty line
+                this.nextLine();
+            }
+
             this.skipWhitespace();
             return true;
         } catch (IOException e) {
