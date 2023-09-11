@@ -179,10 +179,11 @@ public class Scanner {
             System.out.println("ERROR " + this.lineNum + ": " + "'" + this.currChar + "'" + " is not a valid starting character of ILOC");
 //            skipToNextToken();
         }
+        Token returnToken = new Token(this.token, this.lexeme, this.lineNum);
         if (!success) {
             nextLine();
         }
-        return new Token(this.token, this.lexeme, this.lineNum);
+        return returnToken;
     }
 
     private boolean handleSlash() {

@@ -68,17 +68,24 @@ public class Parser {
                     break;
                 default:
                     if (currToken.getOpCode() == -1) {
+                        // we are skipping when we already skipped for an invalid character
+                        // in the case we get a faulty start
                         System.out.println("ERROR " + currToken.getLineNum() + ": " + currToken.getLexeme());
+//                        scanner.nextLine();
+//                        currToken = scanner.scanNextWord();
+                        errorCount += 1;
                     }
                     break;
 
             }
             // scan next and handle EOF
-//            currToken = scanner.scanNextWord();
-            if (currToken.getOpCode() == 10) {
-                scanner.nextLine();
-                currToken = scanner.scanNextWord();
-            }
+            currToken = scanner.scanNextWord();
+//            if (currToken.getOpCode() == 10) {
+//                scanner.nextLine();
+//                currToken = scanner.scanNextWord();
+//            } else {
+//                currToken = scanner.scanNextWord();
+//            }
         }
         return errorCount;
     }
@@ -90,13 +97,14 @@ public class Parser {
     public void handleFaultyIR(int currLex, int prevLex, int opcode) {
         errorCount += 1;
         System.out.println("ERROR " + this.currToken.getLineNum() + ": There was no " + IntermediateList.tokenConversion[currLex] + " following " + IntermediateList.tokenConversion[prevLex] + " for opCode " + IntermediateList.tokenConversion[opcode]);
-        while (this.currToken.getOpCode()!= EOL) {
+        while (this.currToken.getOpCode()!= EOL && this.currToken.getOpCode() != -1) {
             this.currToken = scanner.scanNextWord();
         }
+
     }
     private void finishMEMOP() {
         String lexeme = currToken.getLexeme();
-        IntermediateNode newNode = new IntermediateNode(this.lineNum, 0, lexeme);
+        IntermediateNode newNode = new IntermediateNode(currToken.getLineNum(), 0, lexeme);
         currToken = scanner.scanNextWord();
         if (currToken.getOpCode() == REG) {
             newNode.setSourceRegister(0, Integer.parseInt(currToken.getLexeme()));
@@ -129,7 +137,7 @@ public class Parser {
 
     private void finishLOADI() {
         // start with loadI
-        IntermediateNode newNode = new IntermediateNode(this.lineNum, 1, currToken.getLexeme());
+        IntermediateNode newNode = new IntermediateNode(currToken.getLineNum(), 1, currToken.getLexeme());
         currToken = scanner.scanNextWord();
         if (currToken.getOpCode() == 5) {
             // constant
@@ -165,7 +173,7 @@ public class Parser {
     }
 
     private void finishARITHOP() {
-        IntermediateNode newNode = new IntermediateNode(this.lineNum, ARITHOP, currToken.getLexeme());
+        IntermediateNode newNode = new IntermediateNode(currToken.getLineNum(), ARITHOP, currToken.getLexeme());
         currToken = scanner.scanNextWord();
         if (currToken.getOpCode() == REG) {
             newNode.setSourceRegister(0, Integer.parseInt(currToken.getLexeme()));
@@ -204,7 +212,7 @@ public class Parser {
     }
 
     private void finishOUTPUT() {
-        IntermediateNode newNode = new IntermediateNode(this.lineNum, OUTPUT, currToken.getLexeme());
+        IntermediateNode newNode = new IntermediateNode(currToken.getLineNum(), OUTPUT, currToken.getLexeme());
         currToken = scanner.scanNextWord();
         if (currToken.getOpCode() == CONSTANT) {
             currToken = scanner.scanNextWord();
@@ -217,7 +225,7 @@ public class Parser {
     }
 
     private void finishNOP() {
-        IntermediateNode newNode = new IntermediateNode(this.lineNum, NOP, currToken.getLexeme());
+        IntermediateNode newNode = new IntermediateNode(currToken.getLineNum(), NOP, currToken.getLexeme());
         currToken = scanner.scanNextWord();
         if (currToken.getOpCode() == EOL || currToken.getOpCode() == EOF) {
             IRList.append(newNode);
