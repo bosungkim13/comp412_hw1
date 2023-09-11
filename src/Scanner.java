@@ -173,7 +173,6 @@ public class Scanner {
             success = true;
         }
         else {
-            success = false;
             this.lexeme = "Invalid starting character of ILOC language";
             this.token = -1;
             System.out.println("ERROR " + this.lineNum + ": " + "'" + this.currChar + "'" + " is not a valid starting character of ILOC");
@@ -192,7 +191,6 @@ public class Scanner {
             this.token = 10;
             return true;
         } else {
-            System.out.println("ERROR: '/' followed by " + this.currChar + " is not part of the ILOC language");
             return false;
         }
     }
@@ -252,8 +250,6 @@ public class Scanner {
     }
 
     public boolean finishValidNumber(String lexeme, int token) {
-        // change this so you can't have a comma after a constant
-//        if (isWhitespace() || this.currChar == ASCIIConstants.comma || this.currPos == this.currLine.length() - 1) {
             this.lexeme = lexeme;
             this.token = token;
             // case with comma we dont want to skip
@@ -261,20 +257,6 @@ public class Scanner {
                 skipToNextToken();
             }
             return true;
-//            if (token == 11) {
-//                skipToNextToken(1);
-//            } else {
-//                skipToNextToken();
-//            }
-//            return true;
-//        } else {
-//            // invalid digit
-//            this.lexeme = "Invalid character" + this.currChar + " following number " + lexeme;
-//            this.token = -1;
-////            skipToNextToken();
-//            nextLine();
-//            return false;
-//        }
 
     }
 
@@ -282,8 +264,6 @@ public class Scanner {
         System.out.println("ERROR " + this.lineNum + ": Invalid character followed by '" + prevChar + "'");
         this.lexeme = "Invalid character followed by '" + prevChar + "'";
         this.token = -1;
-//        skipToNextToken();
-//        nextLine();
         return false;
     }
     public boolean handleA() {

@@ -52,7 +52,12 @@ public class Main {
      * - r <name> ----> read file specified by name and print out the IR
      */
     public static void main(String[] args) {
-//        args = new String[] {"-p", "src/tests/Holmes.i"};
+        args = new String[] { "src/tests/report3.i"};
+        flagVal = new HashMap<>();
+        flagVal.put("-r", 3);
+        flagVal.put("-p", 2);
+        flagVal.put("-h", 4);
+        flagVal.put("-s", 1);
         String[] parsedArgs = parseFlag(args);
         int error;
         Scanner scanner;
@@ -105,7 +110,7 @@ public class Main {
     }
 
     private static String[] parseFlag(String[] args) {
-        String currFlag = null;
+        String currFlag = P_FLAG;
         String filename = null;
         if (args.length == 0) {
             currFlag = H_FLAG;

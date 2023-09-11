@@ -10,7 +10,6 @@ public class Parser {
     private IntermediateList IRList;
     private Token currToken;
     private int lineNum = 1;
-    private int maxSourceReg = 0;
     private int errorCount = 0;
     public static Map<String, Integer> tokenConversion =  new HashMap<>();
 
