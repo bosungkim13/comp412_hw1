@@ -166,7 +166,7 @@ public class Scanner {
         }
         else {
             success = false;
-            this.lexeme = "ERROR: Invalid starting character of ILOC language";
+            this.lexeme = "Invalid starting character of ILOC language";
             this.token = -1;
             System.out.println("ERROR " + this.lineNum + ": " + "'" + this.currChar + "'" + " is not a valid starting character of ILOC");
 //            skipToNextToken();

@@ -67,7 +67,10 @@ public class Parser {
                     scanner.nextLine();
                     break;
                 default:
-                    System.out.println("ERROR " + this.lineNum + ": Invalid ILOC opcode " + currToken.getOpCode());
+                    if (currToken.getOpCode() == -1) {
+                        System.out.println("ERROR " + currToken.getLineNum() + ": " + currToken.getLexeme());
+                    }
+                    break;
 
             }
             // scan next and handle EOF
