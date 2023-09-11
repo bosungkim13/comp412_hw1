@@ -52,7 +52,7 @@ public class Main {
      * - r <name> ----> read file specified by name and print out the IR
      */
     public static void main(String[] args) {
-        args = new String[] {"-s", "src/tests/Holmes.i"};
+        args = new String[] {"-p", "src/tests/T8k.i"};
         String[] parsedArgs = parseFlag(args);
         int error;
         Scanner scanner;

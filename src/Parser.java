@@ -82,7 +82,7 @@ public class Parser {
 
     public void handleFaultyIR(int currLex, int prevLex, int opcode) {
         errorCount += 1;
-        System.out.println("ERROR: There was no " + IntermediateList.tokenConversion[currLex] + " following " + IntermediateList.tokenConversion[prevLex] + " for opCode " + IntermediateList.tokenConversion[opcode]);
+        System.out.println("ERROR " + this.currToken.getLineNum() + ": There was no " + IntermediateList.tokenConversion[currLex] + " following " + IntermediateList.tokenConversion[prevLex] + " for opCode " + IntermediateList.tokenConversion[opcode]);
         while (this.currToken.getOpCode()!= EOL) {
             this.currToken = scanner.scanNextWord();
         }
@@ -102,15 +102,15 @@ public class Parser {
                     if (currToken.getOpCode() == EOL || currToken.getOpCode() == EOF) {
                         IRList.append(newNode);
                     } else {
-                        handleFaultyIR(10, 11, currToken.getOpCode());
+                        handleFaultyIR(10, 11, 0);
 //                        printCustomErrorMsg("There was no EOL operation at the end of the " + lexeme + " operation");
                     }
                 } else {
-                    handleFaultyIR(11, 8, currToken.getOpCode());
+                    handleFaultyIR(11, 8, 0);
                     // printCustomErrorMsg("There was no Register value at the end in the " + lexeme + " operation");
                 }
             } else {
-                handleFaultyIR(8, 11, currToken.getOpCode());
+                handleFaultyIR(8, 11, 0);
                 // printCustomErrorMsg("There was no => in the " + lexeme + " operation");
             }
         } else {
@@ -137,19 +137,19 @@ public class Parser {
                         // eol
                         IRList.append(newNode);
                     } else {
-                        handleFaultyIR(10, 11, currToken.getOpCode());
+                        handleFaultyIR(10, 11, 1);
                         //printCustomErrorMsg("There was no EOL operation at the end of the LOADI");
                     }
                 } else {
-                    handleFaultyIR(11, 8, currToken.getOpCode());
+                    handleFaultyIR(11, 8, 1);
                     // printCustomErrorMsg("There was no register following the into in LOADI");
                 }
             } else {
-                handleFaultyIR(8, 5, currToken.getOpCode());
+                handleFaultyIR(8, 5, 1);
                 // printCustomErrorMsg("There was no INTO operation following the constant in LOADI");
             }
         } else {
-            handleFaultyIR(5, currToken.getOpCode(), currToken.getOpCode());
+            handleFaultyIR(5, currToken.getOpCode(), 1);
             // printCustomErrorMsg("There was no constant following the LOADI operation");
         }
 
