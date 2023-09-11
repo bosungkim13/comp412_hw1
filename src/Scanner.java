@@ -77,12 +77,14 @@ public class Scanner {
     }
 
     public boolean moveNextChar() {
-        if (this.currPos + 1 < this.currLine.length()){
+        if (this.currPos < this.currLine.length()){
             this.currPos = this.currPos + 1;
             try {
                 this.currChar = this.currLine.charAt(this.currPos);
             } catch (Exception e) {
-                System.out.println("DEBUG: unable to move to next character");
+                if (debug) {
+                    System.out.println("DEBUG: unable to move to next character");
+                }
                 return false;
             }
 
@@ -92,10 +94,16 @@ public class Scanner {
     }
 
     public char peekNext() {
+        char returnChar;
         if (currPos + 1 <= currLine.length()){
-            return currLine.charAt(currPos + 1);
+            try{
+                returnChar = currLine.charAt(currPos + 1);
+                return returnChar;
+            } catch (Exception e) {
+                System.out.println("ERROR: Could not peek next character of current line" + this.currLine);
+            }
+
         }
-        System.out.println("ERROR: Could not peek next character of current line" + this.currLine);
         return 0;
     }
 
@@ -228,40 +236,44 @@ public class Scanner {
 
     public boolean finishValidWord(String lexeme, int token) {
         boolean isWhitespace = isNextWhitespace();
-        if (isWhitespace || this.currPos == this.currLine.length() - 1) {
-            // get to next token
-            this.lexeme = lexeme;
-            this.token = token;
+//        if (isWhitespace || this.currPos == this.currLine.length() - 1) {
+        this.lexeme = lexeme;
+        this.token = token;
+//        skipToNextToken();
+        if (isWhitespace) {
+            // skip whitespaces
             skipToNextToken();
-            return true;
         } else {
-            // skip to next token
-            this.lexeme = "No whitespace following word";
-            this.token = -1;
-            skipToNextToken();
-            return false;
+            // move to next character
+            moveNextChar();
         }
+        return true;
     }
 
     public boolean finishValidNumber(String lexeme, int token) {
         // change this so you can't have a comma after a constant
-        if (isWhitespace() || this.currChar == ASCIIConstants.comma || this.currPos == this.currLine.length() - 1) {
+//        if (isWhitespace() || this.currChar == ASCIIConstants.comma || this.currPos == this.currLine.length() - 1) {
             this.lexeme = lexeme;
             this.token = token;
-            if (token == 11) {
-                skipToNextToken(1);
-            } else {
+            // case with comma we dont want to skip
+            if (isWhitespace()) {
                 skipToNextToken();
             }
             return true;
-        } else {
-            // invalid digit
-            this.lexeme = "Invalid character" + this.currChar + " following number " + lexeme;
-            this.token = -1;
-//            skipToNextToken();
-            nextLine();
-            return false;
-        }
+//            if (token == 11) {
+//                skipToNextToken(1);
+//            } else {
+//                skipToNextToken();
+//            }
+//            return true;
+//        } else {
+//            // invalid digit
+//            this.lexeme = "Invalid character" + this.currChar + " following number " + lexeme;
+//            this.token = -1;
+////            skipToNextToken();
+//            nextLine();
+//            return false;
+//        }
 
     }
 
@@ -270,7 +282,7 @@ public class Scanner {
         this.lexeme = "Invalid character followed by '" + prevChar + "'";
         this.token = -1;
 //        skipToNextToken();
-        nextLine();
+//        nextLine();
         return false;
     }
     public boolean handleA() {
@@ -281,7 +293,7 @@ public class Scanner {
                 return finishInvalidWord('d');
             }
         } else{
-            return finishInvalidWord('d');
+            return finishInvalidWord('a');
         }
     }
 

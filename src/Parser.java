@@ -74,7 +74,11 @@ public class Parser {
 
             }
             // scan next and handle EOF
-            currToken = scanner.scanNextWord();
+//            currToken = scanner.scanNextWord();
+            if (currToken.getOpCode() == 10) {
+                scanner.nextLine();
+                currToken = scanner.scanNextWord();
+            }
         }
         return errorCount;
     }
@@ -94,30 +98,32 @@ public class Parser {
         String lexeme = currToken.getLexeme();
         IntermediateNode newNode = new IntermediateNode(this.lineNum, 0, lexeme);
         currToken = scanner.scanNextWord();
-        if (currToken.getOpCode() == 11) {
+        if (currToken.getOpCode() == REG) {
             newNode.setSourceRegister(0, Integer.parseInt(currToken.getLexeme()));
             currToken = scanner.scanNextWord();
             if (currToken.getOpCode() == 8) {
                 currToken = scanner.scanNextWord();
-                if (currToken.getOpCode() == 11) {
+                if (currToken.getOpCode() == REG) {
                     newNode.setSourceRegister(1, Integer.parseInt(currToken.getLexeme()));
                     currToken = scanner.scanNextWord();
                     if (currToken.getOpCode() == EOL || currToken.getOpCode() == EOF) {
+                        // BOSUNG MOVE TO NEXT LINE
                         IRList.append(newNode);
                     } else {
-                        handleFaultyIR(10, 11, 0);
+                        handleFaultyIR(10, REG, 0);
 //                        printCustomErrorMsg("There was no EOL operation at the end of the " + lexeme + " operation");
                     }
                 } else {
-                    handleFaultyIR(11, 8, 0);
+                    handleFaultyIR(REG, 8, 0);
                     // printCustomErrorMsg("There was no Register value at the end in the " + lexeme + " operation");
                 }
             } else {
-                handleFaultyIR(8, 11, 0);
+                handleFaultyIR(8, REG, 0);
                 // printCustomErrorMsg("There was no => in the " + lexeme + " operation");
             }
         } else {
-            System.out.println("There was no Register value at the start in the " + lexeme + " operation");
+            handleFaultyIR(REG, MEMOP, MEMOP);
+//            System.out.println("There was no Register value at the start in the " + lexeme + " operation");
         }
     }
 
@@ -132,7 +138,7 @@ public class Parser {
             if (currToken.getOpCode() == 8) {
                 // into
                 currToken = scanner.scanNextWord();
-                if (currToken.getOpCode() == 11) {
+                if (currToken.getOpCode() == REG) {
                     // register
                     newNode.setSourceRegister(1, Integer.parseInt(currToken.getLexeme()));
                     currToken = scanner.scanNextWord();
@@ -140,11 +146,11 @@ public class Parser {
                         // eol
                         IRList.append(newNode);
                     } else {
-                        handleFaultyIR(10, 11, 1);
+                        handleFaultyIR(10, REG, 1);
                         //printCustomErrorMsg("There was no EOL operation at the end of the LOADI");
                     }
                 } else {
-                    handleFaultyIR(11, 8, 1);
+                    handleFaultyIR(REG, 8, 1);
                     // printCustomErrorMsg("There was no register following the into in LOADI");
                 }
             } else {
@@ -161,36 +167,38 @@ public class Parser {
     private void finishARITHOP() {
         IntermediateNode newNode = new IntermediateNode(this.lineNum, ARITHOP, currToken.getLexeme());
         currToken = scanner.scanNextWord();
-        if (currToken.getOpCode() == REGISTER) {
+        if (currToken.getOpCode() == REG) {
             newNode.setSourceRegister(0, Integer.parseInt(currToken.getLexeme()));
             currToken = scanner.scanNextWord();
             if (currToken.getOpCode() == COMMA) {
-                if (currToken.getOpCode() == REGISTER) {
+                currToken = scanner.scanNextWord();
+                if (currToken.getOpCode() == REG) {
                     newNode.setSourceRegister(1, Integer.parseInt(currToken.getLexeme()));
                     currToken = scanner.scanNextWord();
                     if (currToken.getOpCode() == INTO) {
-                        if (currToken.getOpCode() == REGISTER) {
+                        currToken = scanner.scanNextWord();
+                        if (currToken.getOpCode() == REG) {
                             newNode.setSourceRegister(2, Integer.parseInt(currToken.getLexeme()));
                             currToken = scanner.scanNextWord();
                             if (currToken.getOpCode() == EOL || currToken.getOpCode() == EOF) {
                                 IRList.append(newNode);
                             } else {
-                                handleFaultyIR(EOL, REGISTER, ARITHOP);
+                                handleFaultyIR(EOL, REG, ARITHOP);
                             }
                         } else {
-                            handleFaultyIR(REGISTER, INTO, ARITHOP);
+                            handleFaultyIR(REG, INTO, ARITHOP);
                         }
                     } else {
-                        handleFaultyIR(INTO, REGISTER, ARITHOP);
+                        handleFaultyIR(INTO, REG, ARITHOP);
                     }
                 } else {
-                    handleFaultyIR(REGISTER, COMMA, ARITHOP);
+                    handleFaultyIR(REG, COMMA, ARITHOP);
                 }
             } else {
-                handleFaultyIR(COMMA, REGISTER, ARITHOP);
+                handleFaultyIR(COMMA, REG, ARITHOP);
             }
         } else {
-            handleFaultyIR(REGISTER, ARITHOP, ARITHOP);
+            handleFaultyIR(REG, ARITHOP, ARITHOP);
         }
 
     }
@@ -199,6 +207,7 @@ public class Parser {
         IntermediateNode newNode = new IntermediateNode(this.lineNum, OUTPUT, currToken.getLexeme());
         currToken = scanner.scanNextWord();
         if (currToken.getOpCode() == CONSTANT) {
+            currToken = scanner.scanNextWord();
             if (currToken.getOpCode() == EOL || currToken.getOpCode() == EOF) {
                 IRList.append(newNode);
             } else {
