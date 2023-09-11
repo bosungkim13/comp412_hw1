@@ -133,6 +133,7 @@ public class Scanner {
             this.lexeme = "EOL";
             return new Token(this.token, this.lexeme, this.lineNum);
         }
+        this.skipWhitespace();
         this.currChar = this.currLine.charAt(currPos);
         boolean success = false;
         if (this.currChar == ASCIIConstants.a) {
@@ -247,7 +248,7 @@ public class Scanner {
         if (isWhitespace() || this.currChar == ASCIIConstants.comma || this.currPos == this.currLine.length() - 1) {
             this.lexeme = lexeme;
             this.token = token;
-            if (token == 6) {
+            if (token == 11) {
                 skipToNextToken(1);
             } else {
                 skipToNextToken();
@@ -365,7 +366,7 @@ public class Scanner {
             }
         } else if (this.currChar <= '9' && this.currChar >= '0') {
             //handle digit
-            return handleDigit(6);
+            return handleDigit(11);
         }
         return finishInvalidWord('r');
     }
@@ -459,6 +460,8 @@ public class Scanner {
             }
             this.currPos = 0;
             this.lineNum += 1;
+            this.currChar = this.currLine.charAt(this.currPos);
+            this.skipWhitespace();
             return true;
         } catch (IOException e) {
             System.out.println("ERROR " + this.lineNum + ": Faulty file. Cannot read next line");
