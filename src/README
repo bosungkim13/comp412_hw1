@@ -1,0 +1,12 @@
+//NAME: Bo Sung Kim
+//NETID: bk39
+
+Contents of tar file:
+Main.java: contains main function
+Parser.java: contains parser
+Scanner.java: contains scanner
+common.IntermediateRepresentation.IntermediateList: contains the Intermediate Representation doubly linked listc
+common.IntermediateRepresentation.IntermediateNode: contains a node of the Intermediate Represenation list
+common.ASCIIConstants.java: contains constant values of ASCII characters used in lab 1
+common.Token.java: contains representation of a token which contains the line number, lexeme, and token value
+README.md
