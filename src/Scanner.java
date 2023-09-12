@@ -76,21 +76,35 @@ public class Scanner {
         return next == ASCIIConstants.tab || next == ASCIIConstants.space;
     }
 
-    public boolean moveNextChar() {
-        if (this.currPos < this.currLine.length()){
-            this.currPos = this.currPos + 1;
-            try {
-                this.currChar = this.currLine.charAt(this.currPos);
-            } catch (Exception e) {
-                if (debug) {
-                    System.out.println("DEBUG: unable to move to next character");
-                }
-                return false;
-            }
+//    public boolean moveNextChar() {
+//        if (this.currPos < this.currLine.length()){
+//            this.currPos = this.currPos + 1;
+//            try {
+//                this.currChar = this.currLine.charAt(this.currPos);
+//            } catch (Exception e) {
+//                if (debug) {
+//                    System.out.println("DEBUG: unable to move to next character");
+//                }
+//                return false;
+//            }
+//
+//            return true;
+//        }
+//        return false;
+//    }
 
-            return true;
+    public boolean moveNextChar() {
+        this.currPos = this.currPos + 1;
+        try {
+            this.currChar = this.currLine.charAt(this.currPos);
+        } catch (Exception e) {
+            if (debug) {
+                System.out.println("DEBUG: unable to move to next character");
+            }
+            return false;
         }
-        return false;
+
+        return true;
     }
 
     public char peekNext() {

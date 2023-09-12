@@ -9,8 +9,6 @@
 #|-- Parser.java
 #|-- Scanner.java
 
-# Makefile for a Java 8 project with your structure
-
 # Variables
 SRC_DIR := src
 BIN_DIR := bin

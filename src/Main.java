@@ -20,7 +20,7 @@ import java.util.Objects;
  * report all the errors that it finds in the input file.
  *
  * 412fe -r <name> When a -r flag is present, 412fe should read the file specified by <name>, scan
- * it, parse it, build the intermediate representation, and print out the informatio
+ * it, parse it, build the intermediate representation, and print out the information
  */
 public class Main {
     // Constants
