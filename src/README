@@ -1,6 +1,27 @@
 //NAME: Bo Sung Kim
 //NETID: bk39
 
+To build: make build
+To clean: make clean
+
+Flag Descriptions:
+412fe –h When a –h flag is detected, 412fe will produce a list of valid command-line
+arguments that includes a description of all command-line arguments required for Lab 1 as well
+as any additional command-line arguments supported by your 412fe implementation.
+
+412fe -s <name> When a -s flag is present, 412fe should read the file specified by <name>
+and print, to the standard output stream, a list of the tokens that the scanner found.
+For each token, it should print the line number, the token’s type (or syntactic category), and its
+spelling (or lexeme).
+
+412fe -p <name> When a -p flag is present, 412fe should read the file specified by
+<name>, scan it and parse it, build the intermediate representation, and report either success or
+report all the errors that it finds in the input file.
+
+412fe -r <name> When a -r flag is present, 412fe should read the file specified by <name>, scan
+it, parse it, build the intermediate representation, and print out the information
+
+
 Contents of tar file:
 Main.java: contains main function
 Parser.java: contains parser
