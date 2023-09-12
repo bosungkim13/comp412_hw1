@@ -52,7 +52,7 @@ public class Main {
      * - r <name> ----> read file specified by name and print out the IR
      */
     public static void main(String[] args) {
-//        args = new String[] { "src/tests/report3.i"};
+        args = new String[] {"src/tests/yk26.i"};
         flagVal = new HashMap<>();
         flagVal.put("-r", 3);
         flagVal.put("-p", 2);
@@ -103,7 +103,7 @@ public class Main {
 
     private static void handleParseReturn(int errorCount, String fileName) {
         if (errorCount == 0) {
-            System.out.println("Parser successfully parsed " + fileName);
+            System.out.println("Success! Parsed " + fileName);
         } else {
             System.out.println("Parser found " + errorCount + " errors while parsing " + fileName);
         }

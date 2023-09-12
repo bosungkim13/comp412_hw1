@@ -458,6 +458,7 @@ public class Scanner {
             } catch (Exception e) {
                 // We new line into an empty line
                 this.nextLine();
+                return false;
             }
 
             this.skipWhitespace();
