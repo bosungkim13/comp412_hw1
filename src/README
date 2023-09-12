@@ -30,4 +30,6 @@ common.IntermediateRepresentation.IntermediateList: contains the Intermediate Re
 common.IntermediateRepresentation.IntermediateNode: contains a node of the Intermediate Represenation list
 common.ASCIIConstants.java: contains constant values of ASCII characters used in lab 1
 common.Token.java: contains representation of a token which contains the line number, lexeme, and token value
-README.md
+README.md: Readme for this project
+Makefile: contains build and clean instructions to create executable
+412fe: shell file to run this project
