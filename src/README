@@ -4,6 +4,7 @@
 To build: make build
 To clean: make clean
 
+
 Flag Descriptions:
 412fe –h When a –h flag is detected, 412fe will produce a list of valid command-line
 arguments that includes a description of all command-line arguments required for Lab 1 as well
