@@ -29,7 +29,6 @@ public class Renamer {
     public void AddVirtualRegisters() {
         IntermediateNode head = this.IRList.getHead();
         while (this.currNode != head) {
-            System.out.println(Arrays.toString(this.SRToVR));
             this.handleIntermediateNode();
             this.currNode = this.currNode.getPrev();
         }
@@ -41,7 +40,6 @@ public class Renamer {
         // handle definitions
         for (int i = 0; i < numOps; i ++) {
             currRegVal = currNode.getSourceRegister(i);
-            System.out.println("current register value: " + currRegVal);
             if (currRegVal > maxSR || currRegVal < 0) {
                 continue;
             }

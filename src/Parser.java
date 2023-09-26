@@ -248,7 +248,6 @@ public class Parser {
 
     private void setMaxSourceRegister(int regNum) {
         if (regNum > this.maxSourceReg) {
-            System.out.println("New max source register: " + regNum);
             this.maxSourceReg = regNum;
         }
     }
