@@ -1,5 +1,6 @@
 import common.IntermediateRepresentation.IntermediateList;
 import common.IntermediateRepresentation.IntermediateNode;
+import common.IntermediateRepresentation.IntermediateStoreNode;
 import common.Token;
 
 import java.util.HashMap;
@@ -12,7 +13,7 @@ public class Parser {
     private int lineNum = 1;
     private int errorCount = 0;
     public static Map<String, Integer> tokenConversion =  new HashMap<>();
-
+    private int maxSourceReg = 0;
     public static final int MEMOP = 0;
     public static final int LOADI = 1;
     public static final int ARITHOP = 2;
@@ -103,15 +104,22 @@ public class Parser {
     }
     private void finishMEMOP() {
         String lexeme = currToken.getLexeme();
-        IntermediateNode newNode = new IntermediateNode(currToken.getLineNum(), 0, lexeme);
+        IntermediateNode newNode;
+        if (lexeme.equals("store")) {
+            newNode = new IntermediateStoreNode(currToken.getLineNum(), 0, lexeme);
+        } else {
+            newNode = new IntermediateNode(currToken.getLineNum(), 0, lexeme);
+        }
         currToken = scanner.scanNextWord();
         if (currToken.getOpCode() == REG) {
             newNode.setSourceRegister(0, Integer.parseInt(currToken.getLexeme()));
+            this.setMaxSourceRegister(Integer.parseInt(currToken.getLexeme()));
             currToken = scanner.scanNextWord();
             if (currToken.getOpCode() == 8) {
                 currToken = scanner.scanNextWord();
                 if (currToken.getOpCode() == REG) {
                     newNode.setSourceRegister(1, Integer.parseInt(currToken.getLexeme()));
+                    this.setMaxSourceRegister(Integer.parseInt(currToken.getLexeme()));
                     currToken = scanner.scanNextWord();
                     if (currToken.getOpCode() == EOL || currToken.getOpCode() == EOF) {
                         // BOSUNG MOVE TO NEXT LINE
@@ -141,6 +149,7 @@ public class Parser {
         if (currToken.getOpCode() == 5) {
             // constant
             newNode.setSourceRegister(0, Integer.parseInt(currToken.getLexeme()));
+            this.setMaxSourceRegister(Integer.parseInt(currToken.getLexeme()));
             currToken = scanner.scanNextWord();
             if (currToken.getOpCode() == 8) {
                 // into
@@ -148,6 +157,7 @@ public class Parser {
                 if (currToken.getOpCode() == REG) {
                     // register
                     newNode.setSourceRegister(1, Integer.parseInt(currToken.getLexeme()));
+                    this.setMaxSourceRegister(Integer.parseInt(currToken.getLexeme()));
                     currToken = scanner.scanNextWord();
                     if (currToken.getOpCode() == EOL || currToken.getOpCode() == EOF) {
                         // eol
@@ -176,16 +186,19 @@ public class Parser {
         currToken = scanner.scanNextWord();
         if (currToken.getOpCode() == REG) {
             newNode.setSourceRegister(0, Integer.parseInt(currToken.getLexeme()));
+            this.setMaxSourceRegister(Integer.parseInt(currToken.getLexeme()));
             currToken = scanner.scanNextWord();
             if (currToken.getOpCode() == COMMA) {
                 currToken = scanner.scanNextWord();
                 if (currToken.getOpCode() == REG) {
                     newNode.setSourceRegister(1, Integer.parseInt(currToken.getLexeme()));
+                    this.setMaxSourceRegister(Integer.parseInt(currToken.getLexeme()));
                     currToken = scanner.scanNextWord();
                     if (currToken.getOpCode() == INTO) {
                         currToken = scanner.scanNextWord();
                         if (currToken.getOpCode() == REG) {
                             newNode.setSourceRegister(2, Integer.parseInt(currToken.getLexeme()));
+                            this.setMaxSourceRegister(Integer.parseInt(currToken.getLexeme()));
                             currToken = scanner.scanNextWord();
                             if (currToken.getOpCode() == EOL || currToken.getOpCode() == EOF) {
                                 IRList.append(newNode);
@@ -231,6 +244,16 @@ public class Parser {
         } else {
             handleFaultyIR(EOL, NOP, NOP);
         }
+    }
+
+    private void setMaxSourceRegister(int regNum) {
+        if (regNum > this.maxSourceReg) {
+            this.maxSourceReg = regNum;
+        }
+    }
+
+    public int getMaxSourceReg() {
+        return this.maxSourceReg;
     }
 
 

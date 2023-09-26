@@ -72,6 +72,10 @@ public class IntermediateNode {
         }
     }
 
+    public int getOpCode() {
+        return this.opCode;
+    }
+
     private String generateOperandStringArray() {
         StringBuilder sb = new StringBuilder("[");
         for (int elem : operandArray) {
@@ -83,5 +87,15 @@ public class IntermediateNode {
         }
         return sb + "]";
     }
+    public void setVirtualRegister(int operandNum, int value) {
+        this.operandArray[(operandNum*4)+1] = value;
+    }
 
+    public void setNextUseRegister(int operandNum, int value) {
+        this.operandArray[(operandNum*4)+3] = value;
+    }
+
+    public int getLineNum() {
+        return this.lineNum;
+    }
 }
