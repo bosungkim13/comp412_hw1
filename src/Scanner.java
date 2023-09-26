@@ -29,7 +29,7 @@ public class Scanner {
             try {
                 currChar = currLine.charAt(currPos);
             } catch (Exception e) {
-                System.out.println("skipWhitespace: Reached end of line");
+//                System.out.println("skipWhitespace: Reached end of line");
             }
         }
     }

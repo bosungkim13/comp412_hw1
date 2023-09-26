@@ -62,9 +62,9 @@ public class AllocMain {
 
     private static void handleParseReturn(int errorCount, String fileName) {
         if (errorCount == 0) {
-            System.out.println("Success! Parsed " + fileName);
+//            System.out.println("Success! Parsed " + fileName);
         } else {
-            System.out.println("Parser found " + errorCount + " errors while parsing " + fileName);
+//            System.out.println("Parser found " + errorCount + " errors while parsing " + fileName);
         }
     }
 

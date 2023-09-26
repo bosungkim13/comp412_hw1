@@ -4,7 +4,7 @@
 //OUTPUT: 26
 
 // This test block attempts to calculate the probability of two indepent coin
-// flips both simultaneously being heads using a monte carlo simulation.
+// flips both simultaneously being heads F using a monte carlo simulation.
 //
 // It does 100 coin flips.
 //

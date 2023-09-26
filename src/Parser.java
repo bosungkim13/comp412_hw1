@@ -149,7 +149,6 @@ public class Parser {
         if (currToken.getOpCode() == 5) {
             // constant
             newNode.setSourceRegister(0, Integer.parseInt(currToken.getLexeme()));
-            this.setMaxSourceRegister(Integer.parseInt(currToken.getLexeme()));
             currToken = scanner.scanNextWord();
             if (currToken.getOpCode() == 8) {
                 // into
@@ -227,6 +226,7 @@ public class Parser {
         IntermediateNode newNode = new IntermediateNode(currToken.getLineNum(), OUTPUT, currToken.getLexeme());
         currToken = scanner.scanNextWord();
         if (currToken.getOpCode() == CONSTANT) {
+            newNode.setSourceRegister(0, Integer.parseInt(currToken.getLexeme()));
             currToken = scanner.scanNextWord();
             if (currToken.getOpCode() == EOL || currToken.getOpCode() == EOF) {
                 IRList.append(newNode);
@@ -248,6 +248,7 @@ public class Parser {
 
     private void setMaxSourceRegister(int regNum) {
         if (regNum > this.maxSourceReg) {
+            System.out.println("New max source register: " + regNum);
             this.maxSourceReg = regNum;
         }
     }

@@ -3,6 +3,7 @@ import common.IntermediateRepresentation.IntermediateNode;
 import common.IntermediateRepresentation.IntermediateStoreNode;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 
 public class Renamer {
     private int vrName = 0;
@@ -28,6 +29,7 @@ public class Renamer {
     public void AddVirtualRegisters() {
         IntermediateNode head = this.IRList.getHead();
         while (this.currNode != head) {
+            System.out.println(Arrays.toString(this.SRToVR));
             this.handleIntermediateNode();
             this.currNode = this.currNode.getPrev();
         }
@@ -39,6 +41,7 @@ public class Renamer {
         // handle definitions
         for (int i = 0; i < numOps; i ++) {
             currRegVal = currNode.getSourceRegister(i);
+            System.out.println("current register value: " + currRegVal);
             if (currRegVal > maxSR || currRegVal < 0) {
                 continue;
             }
@@ -70,23 +73,23 @@ public class Renamer {
     }
 
     private void handleDef(int i) {
-        if (SRToVR[i] == -1) {
-            SRToVR[i] = vrName;
+        if (SRToVR[this.currRegVal] == -1) {
+            SRToVR[this.currRegVal] = vrName;
             vrName ++;
         }
-        currNode.setVirtualRegister(i, SRToVR[currRegVal]);
-        currNode.setNextUseRegister(i, LU[currRegVal]);
+        currNode.setVirtualRegister(i, SRToVR[this.currRegVal]);
+        currNode.setNextUseRegister(i, LU[this.currRegVal]);
         // reset because we have encountered a definition
         SRToVR[this.currRegVal] = -1;
         LU[this.currRegVal] = -1;
     }
 
     private void handleUse(int i) {
-        if (SRToVR[i] == -1) {
-            SRToVR[i] = vrName;
+        if (SRToVR[this.currRegVal] == -1) {
+            SRToVR[this.currRegVal] = vrName;
             vrName ++;
         }
-        currNode.setVirtualRegister(i, SRToVR[i]);
+        currNode.setVirtualRegister(i, SRToVR[this.currRegVal]);
         currNode.setNextUseRegister(i, LU[currRegVal]);
         LU[currRegVal] = currNode.getLineNum();
     }
