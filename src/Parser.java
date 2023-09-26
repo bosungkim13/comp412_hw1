@@ -10,7 +10,6 @@ public class Parser {
     private Scanner scanner;
     private IntermediateList IRList;
     private Token currToken;
-    private int lineNum = 1;
     private int errorCount = 0;
     public static Map<String, Integer> tokenConversion =  new HashMap<>();
     private int maxSourceReg = 0;
@@ -124,6 +123,7 @@ public class Parser {
                     if (currToken.getOpCode() == EOL || currToken.getOpCode() == EOF) {
                         // BOSUNG MOVE TO NEXT LINE
                         IRList.append(newNode);
+                        scanner.nextLine();
                     } else {
                         handleFaultyIR(10, REG, 0);
 //                        printCustomErrorMsg("There was no EOL operation at the end of the " + lexeme + " operation");
@@ -161,6 +161,7 @@ public class Parser {
                     if (currToken.getOpCode() == EOL || currToken.getOpCode() == EOF) {
                         // eol
                         IRList.append(newNode);
+                        scanner.nextLine();
                     } else {
                         handleFaultyIR(10, REG, 1);
                         //printCustomErrorMsg("There was no EOL operation at the end of the LOADI");
@@ -201,6 +202,7 @@ public class Parser {
                             currToken = scanner.scanNextWord();
                             if (currToken.getOpCode() == EOL || currToken.getOpCode() == EOF) {
                                 IRList.append(newNode);
+                                scanner.nextLine();
                             } else {
                                 handleFaultyIR(EOL, REG, ARITHOP);
                             }
@@ -230,6 +232,7 @@ public class Parser {
             currToken = scanner.scanNextWord();
             if (currToken.getOpCode() == EOL || currToken.getOpCode() == EOF) {
                 IRList.append(newNode);
+                scanner.nextLine();
             } else {
                 handleFaultyIR(EOL, OUTPUT, OUTPUT);
             }
@@ -241,6 +244,7 @@ public class Parser {
         currToken = scanner.scanNextWord();
         if (currToken.getOpCode() == EOL || currToken.getOpCode() == EOF) {
             IRList.append(newNode);
+            scanner.nextLine();
         } else {
             handleFaultyIR(EOL, NOP, NOP);
         }
