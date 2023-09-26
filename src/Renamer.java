@@ -25,7 +25,7 @@ public class Renamer {
         }
     }
 
-    public void RenameAlgo() {
+    public void AddVirtualRegisters() {
         IntermediateNode head = this.IRList.getHead();
         while (this.currNode != head) {
             this.handleIntermediateNode();

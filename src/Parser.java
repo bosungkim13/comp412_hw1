@@ -256,5 +256,9 @@ public class Parser {
         return this.maxSourceReg;
     }
 
+    public IntermediateList getIRList() {
+        return this.IRList;
+    }
+
 
 }

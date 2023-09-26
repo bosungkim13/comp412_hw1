@@ -12,8 +12,8 @@
 # Variables
 SRC_DIR := src
 BIN_DIR := bin
-JAR_NAME := lab1.jar
-MAIN_CLASS := Main
+JAR_NAME := lab2.jar
+MAIN_CLASS := AllocMain
 CLASSPATH := .
 
 # Create list of sources and corresponding class files
