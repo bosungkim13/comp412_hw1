@@ -91,11 +91,19 @@ public class IntermediateNode {
         this.operandArray[(operandNum*4)+1] = value;
     }
 
+    public void setPhysicalRegister(int operandNum, int value) {
+        this.operandArray[(operandNum*4) + 2] = value;
+    }
+
     public void setNextUseRegister(int operandNum, int value) {
         this.operandArray[(operandNum*4)+3] = value;
     }
 
     public int getLineNum() {
         return this.lineNum;
+    }
+
+    public String getLexeme() {
+        return this.lexeme;
     }
 }
