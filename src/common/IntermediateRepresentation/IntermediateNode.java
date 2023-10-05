@@ -94,6 +94,9 @@ public class IntermediateNode {
     public void setPhysicalRegister(int operandNum, int value) {
         this.operandArray[(operandNum*4) + 2] = value;
     }
+    public int getPhysicalRegister(int operandNum) {
+        return this.operandArray[(operandNum*4) + 2];
+    }
 
     public void setNextUseRegister(int operandNum, int value) {
         this.operandArray[(operandNum*4)+3] = value;
@@ -105,5 +108,24 @@ public class IntermediateNode {
 
     public String getLexeme() {
         return this.lexeme;
+    }
+
+    public int getNextUse(int operand) {
+        return this.operandArray[4 * operand + 3];
+    }
+    public String getPRrep() {
+        if (this.opCode == 2) {
+            return this.lexeme + "  r" + this.getPhysicalRegister(0) + ", r"
+                    + this.getPhysicalRegister(1)
+                    + " => r" + this.getPhysicalRegister(2);
+        } else if (this.opCode == 1) {
+            return this.lexeme + " " + this.getSourceRegister(0) + " => r" + this.getPhysicalRegister(1);
+        } else if (this.opCode == 0) {
+            return this.lexeme + " r" + this.getPhysicalRegister(0) + " => r" + this.getPhysicalRegister(1);
+        } else if (this.opCode == 3){
+            return this.lexeme + " " + this.getSourceRegister(0);
+        } else {
+            return this.lexeme;
+        }
     }
 }

@@ -36,6 +36,7 @@ public class Allocator {
         this.VRtoSpillLoc = new int[vrName];
         this.VRtoPR = new int[vrName];
         this.PRtoNU = new int[numRegisters];
+        this.PRtoVR = new int[numRegisters];
         this.markedReg = INVAlID;
         this.currNode = renamedList.getHead().getNext();
         for (int i = 0; i < vrName; i++) {
@@ -173,9 +174,30 @@ public class Allocator {
     }
 
     private void handleUses(List<Integer> list) {
+        for (int i : list) {
+            int pr = VRtoPR[currNode.getVirtualRegister(i)];
+            if (pr == INVAlID) {
+                pr = getPR(currNode.getVirtualRegister(i), currNode.getNextUse(i));
+                currNode.setPhysicalRegister(i, pr);
+                restore(currNode.getVirtualRegister(i), pr);
+            } else {
+                currNode.setPhysicalRegister(i, pr);
+                PRtoNU[pr] = currNode.getNextUse(i);
+            }
+            markedReg = currNode.getPhysicalRegister(i);
+        }
+        for (int i : list) {
+            if (currNode.getNextUse(i) == INVAlID && PRtoVR[currNode.getPhysicalRegister(i)] != INVAlID) {
+                freePR(currNode.getPhysicalRegister(i));
+            }
+        }
+        clearMarkedReg();
     }
 
     private void handleDef(List<Integer> list) {
+        for (int i : list) {
+            currNode.setPhysicalRegister(i, getPR(currNode.getVirtualRegister(i), currNode.getNextUse(i)));
+        }
     }
 
     private void clearMarkedReg() {

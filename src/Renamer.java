@@ -13,6 +13,8 @@ public class Renamer {
     private int SRToVR[];
     private int LU[];
     private int currRegVal;
+    private int maxLive;
+    private int currLive;
 
     public Renamer(IntermediateList IRList, int maxSR) {
         this.IRList = IRList;
@@ -24,9 +26,11 @@ public class Renamer {
             this.SRToVR[i] = -1;
             this.LU[i] = -1;
         }
+        this.maxLive = 0;
+        this.currLive = 0;
     }
 
-    public void AddVirtualRegisters() {
+    public void addVirtualRegisters() {
         IntermediateNode head = this.IRList.getHead();
         while (this.currNode != head) {
             this.handleIntermediateNode();
@@ -86,10 +90,22 @@ public class Renamer {
         if (SRToVR[this.currRegVal] == -1) {
             SRToVR[this.currRegVal] = vrName;
             vrName ++;
+            currLive ++;
+            if (currLive > maxLive) {
+                maxLive = currLive;
+            }
         }
         currNode.setVirtualRegister(i, SRToVR[this.currRegVal]);
         currNode.setNextUseRegister(i, LU[currRegVal]);
         LU[currRegVal] = currNode.getLineNum();
+    }
+
+    public int getMaxLive() {
+        return this.maxLive;
+    }
+
+    public int getVrName() {
+        return this.vrName;
     }
 
 }

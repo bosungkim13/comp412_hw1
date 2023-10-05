@@ -9,7 +9,7 @@ public class AllocMain {
     // Constants
     public static final String H_FLAG = "-h";
     public static final String X_FLAG = "-x";
-    public static final String K_FLAG = "k";
+    public static final String K_FLAG = "-k";
     public static Map<String, Integer> flagVal;
 
     public static void commandHelp() {
@@ -26,10 +26,11 @@ public class AllocMain {
      * - x <name> ----> scan, parse, rename, and print ILOC of the input block
      */
     public static void main(String[] args) {
+        args = new String[] {"10", "src/tests/cc4.i"};
         flagVal = new HashMap<>();
         flagVal.put("-h", 3);
-        flagVal.put("k", 2);
-        flagVal.put("-x", 1);
+        flagVal.put("-x", 2);
+        flagVal.put("-k", 1);
         String[] parsedArgs = parseFlag(args);
         int error;
         Scanner scanner;
@@ -50,10 +51,37 @@ public class AllocMain {
                 if (error == 0) {
                     IntermediateList representation = parser.getIRList();
                     Renamer renamer = new Renamer(representation, parser.getMaxSourceReg());
-                    renamer.AddVirtualRegisters();
+                    renamer.addVirtualRegisters();
                     System.out.println(representation.getILoc());
                 } else {
                     handleParseReturn(error, parsedArgs[1]);
+                }
+                break;
+            case K_FLAG:
+                int numRegisters = Integer.parseInt(parsedArgs[2]);
+                if (numRegisters < 3 || numRegisters > 64) {
+                    System.err.println("ERROR: Passed k value outside of range. Must be between [3, 64] \n");
+                    commandHelp();
+                    return;
+                }
+                scanner = new Scanner(parsedArgs[1]);
+                if (!scanner.openFile()) {
+                    return;
+                }
+                parser = new Parser(scanner);
+                error = parser.parse();
+                if (error == 0) {
+                    // the parse was successful and we can get the IR from the parser
+                    IntermediateList representation = parser.getIRList();
+                    Renamer renamer = new Renamer(representation, parser.getMaxSourceReg());
+                    renamer.addVirtualRegisters();
+                    Allocator allocator = new Allocator(representation, numRegisters, renamer.getVrName(), renamer.getMaxLive());
+                    allocator.allocate();
+                    System.out.print(representation.getPRCode());
+                } else {
+                    // there was an error in the parse
+                    handleParseReturn(error, args[1]);
+                    return;
                 }
                 break;
         }
@@ -71,11 +99,21 @@ public class AllocMain {
     private static String[] parseFlag(String[] args) {
         String currFlag = H_FLAG;
         String filename = null;
+        Integer numRegisters = 0;
         if (args.length == 0) {
             currFlag = H_FLAG;
         }
         for (String arg : args) {
-            if (!arg.equals(H_FLAG) && !arg.equals(K_FLAG) && !arg.equals(X_FLAG)) {
+            boolean isNum;
+            try {
+                numRegisters = Integer.parseInt(arg);
+                arg = K_FLAG;
+                isNum = true;
+            } catch (Exception e) {
+                isNum = false;
+            }
+
+            if (!arg.equals(H_FLAG) && !isNum ) {
                 if (filename != null) {
                     System.out.println("ERROR: 412fe can only process one input file at a time");
                 } else {
@@ -91,7 +129,7 @@ public class AllocMain {
                 }
             }
         }
-        return new String[] {currFlag, filename};
+        return new String[] {currFlag, filename, numRegisters.toString()};
     }
 
 }
