@@ -26,7 +26,7 @@ public class AllocMain {
      * - x <name> ----> scan, parse, rename, and print ILOC of the input block
      */
     public static void main(String[] args) {
-        args = new String[] {"10", "src/tests/cc4.i"};
+//        args = new String[] {"7", "src/tests/cc1.i"};
         flagVal = new HashMap<>();
         flagVal.put("-h", 3);
         flagVal.put("-x", 2);
@@ -113,7 +113,7 @@ public class AllocMain {
                 isNum = false;
             }
 
-            if (!arg.equals(H_FLAG) && !isNum ) {
+            if (!arg.equals(H_FLAG) && !arg.equals(X_FLAG)&& !isNum ) {
                 if (filename != null) {
                     System.out.println("ERROR: 412fe can only process one input file at a time");
                 } else {
