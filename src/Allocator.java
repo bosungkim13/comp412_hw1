@@ -161,7 +161,7 @@ public class Allocator {
 
     private void handleLOADI() {
         this.VRtoRematerializable.put(this.currNode.getVirtualRegister(1), this.currNode);
-        handleDef(Arrays.asList(1));
+//        handleDef(Arrays.asList(1));
     }
 
     private void handleARITHOP() {
