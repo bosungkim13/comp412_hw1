@@ -111,7 +111,7 @@ public class Allocator {
         VRtoPR[spillVR] = INVAlID;
 
         // if VR is rematerializable then we don't need to add the spill instructions
-//        if (!VRtoRematerializable.containsKey(spillVR)) {
+        if (!VRtoRematerializable.containsKey(spillVR)) {
             // insert nodes as needed
             IntermediateNode loadINode = new IntermediateNode(Integer.MAX_VALUE, LOADI, "loadI");
             loadINode.setSourceRegister(0, currSpillAdrr);
@@ -123,7 +123,7 @@ public class Allocator {
             storeNode.setPhysicalRegister(0, spillReg);
             storeNode.setPhysicalRegister(1, reservedSpillReg);
             insertBeforeCurrNode(storeNode);
-//        }
+        }
         return spillReg;
     }
 
@@ -160,7 +160,7 @@ public class Allocator {
     }
 
     private void handleLOADI() {
-//        this.VRtoRematerializable.put(this.currNode.getVirtualRegister(1), this.currNode);
+        this.VRtoRematerializable.put(this.currNode.getVirtualRegister(1), this.currNode);
         handleDef(Arrays.asList(1));
     }
 
@@ -198,14 +198,14 @@ public class Allocator {
             if (pr == INVAlID) {
                 pr = getPR(currNode.getVirtualRegister(i), currNode.getNextUse(i));
                 currNode.setPhysicalRegister(i, pr);
-//                if (VRtoRematerializable.containsKey(currNode.getVirtualRegister(i))) {
-//                    // rematerialize
-//                    // WHEN WE REMATERIALIZE AND ADD A PR TO A VR WE NEED TO UPDATE MAP
-//                    rematerialize(currNode.getVirtualRegister(i), pr);
-//                } else {
+                if (VRtoRematerializable.containsKey(currNode.getVirtualRegister(i))) {
+                    // rematerialize
+                    // WHEN WE REMATERIALIZE AND ADD A PR TO A VR WE NEED TO UPDATE MAP
+                    rematerialize(currNode.getVirtualRegister(i), pr);
+                } else {
                     // restore spill from memory
                     restore(currNode.getVirtualRegister(i), pr);
-//                }
+                }
             } else {
                 currNode.setPhysicalRegister(i, pr);
                 PRtoNU[pr] = currNode.getNextUse(i);
