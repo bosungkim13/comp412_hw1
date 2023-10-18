@@ -12,6 +12,7 @@ public class IntermediateNode {
     private String lexeme;
     private int operandArray[];
     private int[] useDef;
+    private boolean isRematerializable;
     public IntermediateNode(int lineNum, int opCode, String lexeme) {
         this.lineNum = lineNum;
         this.opCode = opCode;
@@ -20,6 +21,7 @@ public class IntermediateNode {
         Arrays.setAll(operandArray, i -> -1);
         this.useDef = new int[3];
         Arrays.setAll(useDef, i -> -1);
+        this.isRematerializable = false;
     }
 
 
@@ -40,6 +42,12 @@ public class IntermediateNode {
 
     public void setSourceRegister(int operandNum, int value) {
         this.operandArray[operandNum * 4] = value;
+    }
+    public boolean getIsRematerializable() {
+        return this.isRematerializable;
+    }
+    public void setRematerializable(boolean bool) {
+        this.isRematerializable = bool;
     }
 
     // 0 indexed

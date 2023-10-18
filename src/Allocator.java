@@ -2,6 +2,7 @@ import common.IntermediateRepresentation.IntermediateList;
 import common.IntermediateRepresentation.IntermediateNode;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Stack;
 
@@ -23,6 +24,7 @@ public class Allocator {
     private int[] VRtoSpillLoc;
     private int[] PRtoVR;
     private int[] VRtoPR;
+    private HashMap<Integer, IntermediateNode> VRtoRematerializable;
     private Stack<Integer> registerStack;
     private IntermediateNode currNode;
     private int reservedSpillReg;
@@ -35,6 +37,7 @@ public class Allocator {
         this.registerStack = new Stack<>();
         this.VRtoSpillLoc = new int[vrName];
         this.VRtoPR = new int[vrName];
+        this.VRtoRematerializable = new HashMap<>();
         this.PRtoNU = new int[numRegisters];
         this.PRtoVR = new int[numRegisters];
         this.markedReg = INVAlID;
@@ -107,18 +110,20 @@ public class Allocator {
         // cannot use this VR anymore bc it's assigned to a spill loc
         VRtoPR[spillVR] = INVAlID;
 
-        // insert nodes as needed
-        IntermediateNode loadINode = new IntermediateNode(Integer.MAX_VALUE, LOADI, "loadI");
-        loadINode.setSourceRegister(0, currSpillAdrr);
-        loadINode.setPhysicalRegister(1, reservedSpillReg);
+        // if VR is rematerializable then we don't need to add the spill instructions
+        if (!VRtoRematerializable.containsKey(spillVR)) {
+            // insert nodes as needed
+            IntermediateNode loadINode = new IntermediateNode(Integer.MAX_VALUE, LOADI, "loadI");
+            loadINode.setSourceRegister(0, currSpillAdrr);
+            loadINode.setPhysicalRegister(1, reservedSpillReg);
 
-        insertBeforeCurrNode(loadINode);
+            insertBeforeCurrNode(loadINode);
 
-        IntermediateNode storeNode = new IntermediateNode(Integer.MAX_VALUE, MEMOP, "store");
-        storeNode.setPhysicalRegister(0, spillReg);
-        storeNode.setPhysicalRegister(1, reservedSpillReg);
-        insertBeforeCurrNode(storeNode);
-
+            IntermediateNode storeNode = new IntermediateNode(Integer.MAX_VALUE, MEMOP, "store");
+            storeNode.setPhysicalRegister(0, spillReg);
+            storeNode.setPhysicalRegister(1, reservedSpillReg);
+            insertBeforeCurrNode(storeNode);
+        }
         return spillReg;
     }
 
@@ -155,7 +160,8 @@ public class Allocator {
     }
 
     private void handleLOADI() {
-        handleDef(Arrays.asList(1));
+        this.VRtoRematerializable.put(this.currNode.getVirtualRegister(1), this.currNode);
+//        handleDef(Arrays.asList(1));
     }
 
     private void handleARITHOP() {
@@ -172,6 +178,19 @@ public class Allocator {
             handleDef(Arrays.asList(1));
         }
     }
+    private void rematerialize(int vr, int pr) {
+        IntermediateNode original = VRtoRematerializable.get(vr);
+        IntermediateNode copy = new IntermediateNode(Integer.MAX_VALUE, LOADI, "loadI");
+        copy.setSourceRegister(0, original.getSourceRegister(0));
+        copy.setPhysicalRegister(1, pr);
+        insertBeforeCurrNode(copy);
+        if (!original.getIsRematerializable()) {
+            // if we have not rematerialized this node already then we should remove it from original
+            original.setRematerializable(true);
+            original.getPrev().setNext(original.getNext());
+            original.getNext().setPrev(original.getPrev());
+        }
+    }
 
     private void handleUses(List<Integer> list) {
         for (int i : list) {
@@ -179,7 +198,13 @@ public class Allocator {
             if (pr == INVAlID) {
                 pr = getPR(currNode.getVirtualRegister(i), currNode.getNextUse(i));
                 currNode.setPhysicalRegister(i, pr);
-                restore(currNode.getVirtualRegister(i), pr);
+                if (VRtoRematerializable.containsKey(currNode.getVirtualRegister(i))) {
+                    // rematerializa
+                    rematerialize(currNode.getVirtualRegister(i), pr);
+                } else {
+                    // restore spill from memory
+                    restore(currNode.getVirtualRegister(i), pr);
+                }
             } else {
                 currNode.setPhysicalRegister(i, pr);
                 PRtoNU[pr] = currNode.getNextUse(i);
