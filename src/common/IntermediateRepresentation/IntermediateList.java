@@ -63,13 +63,13 @@ public class IntermediateList {
     }
 
     public String getPRCode() {
-        String toReturn = "";
+        StringBuilder toReturn = new StringBuilder();
         IntermediateNode currNode = head.getNext();
         while(currNode != tail && currNode != null) {
-            toReturn += currNode.getPRrep() + "\n";
+            toReturn.append(currNode.getPRrep()).append("\n");
             currNode = currNode.getNext();
         }
-        return toReturn;
+        return toReturn.toString();
     }
 
 
