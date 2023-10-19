@@ -180,7 +180,10 @@ public class Allocator {
     }
     private void rematerialize(int vr, int pr) {
         IntermediateNode original = VRtoRematerializable.get(vr);
-        IntermediateNode copy = original.deepCopy();
+//        IntermediateNode copy = original.deepCopy();
+        IntermediateNode copy = new IntermediateNode(Integer.MAX_VALUE, LOADI, "loadI");
+        copy.setSourceRegister(0, original.getSourceRegister(0));
+        copy.setPhysicalRegister(1, pr);
         insertBeforeCurrNode(copy);
         if (!original.getIsRematerializable()) {
             // if we have not rematerialized this node already then we should remove it from original
