@@ -26,7 +26,7 @@ public class AllocMain {
      * - x <name> ----> scan, parse, rename, and print ILOC of the input block
      */
     public static void main(String[] args) {
-//        args = new String[] {"4", "src/tests/report1.i"};
+//        args = new String[] {"3", "src/tests/report2.i"};
         flagVal = new HashMap<>();
         flagVal.put("-h", 3);
         flagVal.put("-x", 2);

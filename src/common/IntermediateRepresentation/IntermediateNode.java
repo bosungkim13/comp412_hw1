@@ -136,4 +136,15 @@ public class IntermediateNode {
             return this.lexeme;
         }
     }
+
+    public IntermediateNode deepCopy() {
+        IntermediateNode copy = new IntermediateNode(this.lineNum, this.opCode, this.lexeme);
+
+        copy.operandArray = Arrays.copyOf(this.operandArray, this.operandArray.length);
+        copy.useDef = Arrays.copyOf(this.useDef, this.useDef.length);
+        copy.isRematerializable = this.isRematerializable;
+
+        return copy;
+    }
+
 }

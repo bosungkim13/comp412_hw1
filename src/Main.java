@@ -52,7 +52,7 @@ public class Main {
      * - r <name> ----> read file specified by name and print out the IR
      */
     public static void main(String[] args) {
-        args = new String[] {"-r", "src/tests/cc2.i"};
+        args = new String[] {"-r", "src/tests/report2.i"};
         flagVal = new HashMap<>();
         flagVal.put("-r", 3);
         flagVal.put("-p", 2);
