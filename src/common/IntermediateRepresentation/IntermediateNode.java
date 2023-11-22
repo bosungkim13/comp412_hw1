@@ -1,6 +1,8 @@
 package common.IntermediateRepresentation;
 
 
+import com.sun.org.apache.xalan.internal.xsltc.compiler.Parser;
+
 import java.util.Arrays;
 
 public class IntermediateNode {
@@ -65,15 +67,18 @@ public class IntermediateNode {
     }
 
     public String getILOCRepresentation() {
+
         if (this.opCode == 2) {
             return this.lexeme + "  r" + this.getVirtualRegister(0) + ", r"
                     + this.getVirtualRegister(1)
                     + " => r" + this.getVirtualRegister(2);
         } else if (this.opCode == 1) {
+            // 1 = lexeme, 2 = source register 0, 3 = virtual register 0, 7 = virtual register 1, 11 = virtual register 1 or 2,
             return this.lexeme + " " + this.getSourceRegister(0) + " => r" + this.getVirtualRegister(1);
         } else if (this.opCode == 0) {
             return this.lexeme + " r" + this.getVirtualRegister(0) + " => r" + this.getVirtualRegister(1);
         } else if (this.opCode == 3){
+            // output
             return this.lexeme + " " + this.getSourceRegister(0);
         } else {
             return this.lexeme;
