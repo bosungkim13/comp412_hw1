@@ -20,9 +20,11 @@ public class Grapher {
     public Map<GraphNode, List<GraphEdge>> getNodeEdgeMap() {
         return this.nodeEdgeMap;
     }
+
     public List<GraphNode[]> getEdges() {
         return this.edges;
     }
+
     public Grapher(IntermediateList IR) {
         this.IR = IR;
         this.nodeEdgeMap = new HashMap<>();
@@ -58,7 +60,7 @@ public class Grapher {
             int currOpcode = currNode.getOpCode();
 
             // handle definitions
-            for (int i = 0; i < numOps; i ++) {
+            for (int i = 0; i < numOps; i++) {
                 currRegVal = currNode.getSourceRegister(i);
                 if (currRegVal < 0) {
                     continue;
@@ -72,7 +74,7 @@ public class Grapher {
                 }
             }
             // handle uses
-            for (int i = 0; i < numOps; i ++) {
+            for (int i = 0; i < numOps; i++) {
                 currRegVal = currNode.getSourceRegister(i);
                 if (currRegVal < 0) {
                     continue;
