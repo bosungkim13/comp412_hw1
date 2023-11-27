@@ -1,3 +1,4 @@
+import com.sun.corba.se.impl.orbutil.graph.Graph;
 import common.GraphUtils.GraphEdge;
 import common.GraphUtils.GraphNode;
 import common.IntermediateRepresentation.IntermediateList;
@@ -11,6 +12,7 @@ public class Grapher {
     private IntermediateList IR;
     private Map<GraphNode, List<GraphEdge>> nodeEdgeMap;
     private Map<Integer, GraphNode> reg2Node; // Maps register number to node
+    private Map<IntermediateNode, GraphNode> IR2graph; // Maps IR node to graph node
     private GraphNode undefNode;
     private int nodeNum;
     private List<GraphNode[]> edges;
@@ -91,6 +93,7 @@ public class Grapher {
             }
 
             GraphNode graphNode = new GraphNode(nodeNum, currentOpcode);
+            IR2graph.put(this.currNode, graphNode);
             graphNode.setLatency(typeLatency.get(currentOpcode));
             graphNode.setOp(currNode.getPRrep());
 
@@ -156,146 +159,62 @@ public class Grapher {
         boolean currIsStore = lex.equals("store");
 
         if (opCode == Parser.MEMOP) {
-            IntermediateNode prevStore = this.getLastNode("store", currIsStore);
+            GraphNode prevStore = this.getLastNode("store", currIsStore);
             if (prevStore == null) {
                 return;
             }
-
-
-            List<IntermediateNode> children = edges.stream().map(GraphEdge::getDestinationNode).collect(Collectors.toList());
-
-
-
+            List<GraphNode> children = edges.stream().map(GraphEdge::getDestinationNode).collect(Collectors.toList());
             if (!children.contains(prevStore)) {
-
-                Edge edge = null;
-
-
-
+                GraphEdge edge = null;
                 if (currIsStore) {
-
-                    edge = new Edge(prevStore, EdgeType.SERIAL, 1);
-
-
-
+                    edge = new GraphEdge(prevStore, "serial", 1);
                 } else {
-
-                    edge = new Edge(prevStore, EdgeType.CONFLICT,
-
-                            this.latencyMap.get(prevStore.getLex()));
-
+                    edge = new GraphEdge(prevStore, "conflict", this.typeLatency.get(prevStore.getOpCode()));
                 }
-
                 edges.add(edge);
-
             }
-
-
-
         } else if (lex.equals("output")) {
-
-
-
-            IRNode prevStore = this.getLastNode("store", currIsStore);
-
-
-
+            GraphNode prevStore = this.getLastNode("store", currIsStore);
             if (prevStore != null) {
-
-                Edge edge = new Edge(prevStore, EdgeType.CONFLICT,
-
-                        this.latencyMap.get(prevStore.getLex()));
-
+                GraphEdge edge = new GraphEdge(prevStore, "conflict", this.typeLatency.get(prevStore.getOpCode()));
                 edges.add(edge);
-
             }
-
-
-
-            IRNode prevOutput = this.getLastNode("output", currIsStore);
-
-
-
+            GraphNode prevOutput = this.getLastNode("output", currIsStore);
             if (prevOutput != null) {
-
-                Edge edge = new Edge(prevOutput, EdgeType.SERIAL, 1);
-
+                GraphEdge edge = new GraphEdge(prevOutput, "serial", 1);
                 edges.add(edge);
-
             }
-
-
-
         } else {
-
             System.err.println("Invalid lex for doSerialConflict()");
-
-
-
         }
-
-
-
     }
 
+    private GraphNode getLastNode(String lex, boolean currIsStore) {
 
+        IntermediateNode iterNode = this.currNode.getPrev();
+        GraphNode currGraphNode = this.IR2graph.get(this.currNode);
+        // get edges of current graph node
+        List<GraphEdge> edges = this.nodeEdgeMap.get(currGraphNode);
 
-    private IntermediateNode getLastNode(String lex, boolean currIsStore) {
-
-
-
-        IRNode currNode = this.currNode.getPrev();
-
-        List<Edge> edges = this.NodeToChildren.get(this.currNode);
-
-
-
-        while (currNode != this.irList.getHead()) {
-
-            String currLex = currNode.getLex();
-
+        while (iterNode != this.IR.getHead()) {
+            String currLex = iterNode.getLexeme();
             if (currLex.equals(lex)) {
-
-                return currNode;
-
+                return this.IR2graph.get(iterNode);
             }
-
-
-
             if (currIsStore) {
-
                 if (currLex.equals("output")) {
-
-                    Edge edge = new Edge(currNode, EdgeType.SERIAL, 1);
-
+                    GraphEdge edge = new GraphEdge(IR2graph.get(iterNode), "serial", 1);
                     edges.add(edge);
-
-
-
                 } else if (currLex.equals("load")) {
-
-                    List<IRNode> children = edges.stream().map(Edge::getSinkNode)
-
-                            .collect(Collectors.toList());
-
-
-
-                    if (!children.contains(currNode)) {
-
-                        Edge edge = new Edge(currNode, EdgeType.SERIAL, 1);
-
+                    List<GraphNode> children = edges.stream().map(GraphEdge::getDestinationNode).collect(Collectors.toList());
+                    if (!children.contains(this.IR2graph.get(iterNode))) {
+                        GraphEdge edge = new GraphEdge(this.IR2graph.get(iterNode),"serial", 1);
                         edges.add(edge);
-
                     }
-
                 }
-
             }
-
             currNode = currNode.getPrev();
-
         }
-
         return null;
 
     }
