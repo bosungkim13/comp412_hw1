@@ -5,6 +5,7 @@ import common.IntermediateRepresentation.IntermediateNode;
 import common.IntermediateRepresentation.IntermediateStoreNode;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class Grapher {
     private IntermediateList IR;
@@ -143,5 +144,159 @@ public class Grapher {
             currNode = currNode.getNext();
             nodeNum++;
         }
+    }
+
+    private void doSerialConflict(GraphNode currGraphNode) {
+        String lex = this.currNode.getLexeme();
+
+        int opCode = this.currNode.getOpCode();
+
+        List<GraphEdge> edges = this.nodeEdgeMap.get(currGraphNode);
+
+        boolean currIsStore = lex.equals("store");
+
+        if (opCode == Parser.MEMOP) {
+            IntermediateNode prevStore = this.getLastNode("store", currIsStore);
+            if (prevStore == null) {
+                return;
+            }
+
+
+            List<IntermediateNode> children = edges.stream().map(GraphEdge::getDestinationNode).collect(Collectors.toList());
+
+
+
+            if (!children.contains(prevStore)) {
+
+                Edge edge = null;
+
+
+
+                if (currIsStore) {
+
+                    edge = new Edge(prevStore, EdgeType.SERIAL, 1);
+
+
+
+                } else {
+
+                    edge = new Edge(prevStore, EdgeType.CONFLICT,
+
+                            this.latencyMap.get(prevStore.getLex()));
+
+                }
+
+                edges.add(edge);
+
+            }
+
+
+
+        } else if (lex.equals("output")) {
+
+
+
+            IRNode prevStore = this.getLastNode("store", currIsStore);
+
+
+
+            if (prevStore != null) {
+
+                Edge edge = new Edge(prevStore, EdgeType.CONFLICT,
+
+                        this.latencyMap.get(prevStore.getLex()));
+
+                edges.add(edge);
+
+            }
+
+
+
+            IRNode prevOutput = this.getLastNode("output", currIsStore);
+
+
+
+            if (prevOutput != null) {
+
+                Edge edge = new Edge(prevOutput, EdgeType.SERIAL, 1);
+
+                edges.add(edge);
+
+            }
+
+
+
+        } else {
+
+            System.err.println("Invalid lex for doSerialConflict()");
+
+
+
+        }
+
+
+
+    }
+
+
+
+    private IntermediateNode getLastNode(String lex, boolean currIsStore) {
+
+
+
+        IRNode currNode = this.currNode.getPrev();
+
+        List<Edge> edges = this.NodeToChildren.get(this.currNode);
+
+
+
+        while (currNode != this.irList.getHead()) {
+
+            String currLex = currNode.getLex();
+
+            if (currLex.equals(lex)) {
+
+                return currNode;
+
+            }
+
+
+
+            if (currIsStore) {
+
+                if (currLex.equals("output")) {
+
+                    Edge edge = new Edge(currNode, EdgeType.SERIAL, 1);
+
+                    edges.add(edge);
+
+
+
+                } else if (currLex.equals("load")) {
+
+                    List<IRNode> children = edges.stream().map(Edge::getSinkNode)
+
+                            .collect(Collectors.toList());
+
+
+
+                    if (!children.contains(currNode)) {
+
+                        Edge edge = new Edge(currNode, EdgeType.SERIAL, 1);
+
+                        edges.add(edge);
+
+                    }
+
+                }
+
+            }
+
+            currNode = currNode.getPrev();
+
+        }
+
+        return null;
+
     }
 }
