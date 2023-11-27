@@ -1,3 +1,4 @@
+import com.sun.corba.se.impl.orbutil.graph.Graph;
 import common.GraphUtils.GraphEdge;
 import common.GraphUtils.GraphNode;
 import common.IntermediateRepresentation.IntermediateList;
@@ -5,11 +6,13 @@ import common.IntermediateRepresentation.IntermediateNode;
 import common.IntermediateRepresentation.IntermediateStoreNode;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class Grapher {
     private IntermediateList IR;
     private Map<GraphNode, List<GraphEdge>> nodeEdgeMap;
     private Map<Integer, GraphNode> reg2Node; // Maps register number to node
+    private Map<IntermediateNode, GraphNode> IR2graph; // Maps IR node to graph node
     private GraphNode undefNode;
     private int nodeNum;
     private List<GraphNode[]> edges;
@@ -92,6 +95,7 @@ public class Grapher {
             }
 
             GraphNode graphNode = new GraphNode(nodeNum, currentOpcode);
+            IR2graph.put(this.currNode, graphNode);
             graphNode.setLatency(typeLatency.get(currentOpcode));
             graphNode.setOp(currNode.getPRrep());
 
@@ -145,5 +149,75 @@ public class Grapher {
             currNode = currNode.getNext();
             nodeNum++;
         }
+    }
+
+    private void doSerialConflict(GraphNode currGraphNode) {
+        String lex = this.currNode.getLexeme();
+
+        int opCode = this.currNode.getOpCode();
+
+        List<GraphEdge> edges = this.nodeEdgeMap.get(currGraphNode);
+
+        boolean currIsStore = lex.equals("store");
+
+        if (opCode == Parser.MEMOP) {
+            GraphNode prevStore = this.getLastNode("store", currIsStore);
+            if (prevStore == null) {
+                return;
+            }
+            List<GraphNode> children = edges.stream().map(GraphEdge::getDestinationNode).collect(Collectors.toList());
+            if (!children.contains(prevStore)) {
+                GraphEdge edge = null;
+                if (currIsStore) {
+                    edge = new GraphEdge(prevStore, "serial", 1);
+                } else {
+                    edge = new GraphEdge(prevStore, "conflict", this.typeLatency.get(prevStore.getOpCode()));
+                }
+                edges.add(edge);
+            }
+        } else if (lex.equals("output")) {
+            GraphNode prevStore = this.getLastNode("store", currIsStore);
+            if (prevStore != null) {
+                GraphEdge edge = new GraphEdge(prevStore, "conflict", this.typeLatency.get(prevStore.getOpCode()));
+                edges.add(edge);
+            }
+            GraphNode prevOutput = this.getLastNode("output", currIsStore);
+            if (prevOutput != null) {
+                GraphEdge edge = new GraphEdge(prevOutput, "serial", 1);
+                edges.add(edge);
+            }
+        } else {
+            System.err.println("Invalid lex for doSerialConflict()");
+        }
+    }
+
+    private GraphNode getLastNode(String lex, boolean currIsStore) {
+
+        IntermediateNode iterNode = this.currNode.getPrev();
+        GraphNode currGraphNode = this.IR2graph.get(this.currNode);
+        // get edges of current graph node
+        List<GraphEdge> edges = this.nodeEdgeMap.get(currGraphNode);
+
+        while (iterNode != this.IR.getHead()) {
+            String currLex = iterNode.getLexeme();
+            if (currLex.equals(lex)) {
+                return this.IR2graph.get(iterNode);
+            }
+            if (currIsStore) {
+                if (currLex.equals("output")) {
+                    GraphEdge edge = new GraphEdge(IR2graph.get(iterNode), "serial", 1);
+                    edges.add(edge);
+                } else if (currLex.equals("load")) {
+                    List<GraphNode> children = edges.stream().map(GraphEdge::getDestinationNode).collect(Collectors.toList());
+                    if (!children.contains(this.IR2graph.get(iterNode))) {
+                        GraphEdge edge = new GraphEdge(this.IR2graph.get(iterNode),"serial", 1);
+                        edges.add(edge);
+                    }
+                }
+            }
+            currNode = currNode.getPrev();
+        }
+        return null;
+
     }
 }
