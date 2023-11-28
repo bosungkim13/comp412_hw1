@@ -12,8 +12,8 @@
 # Variables
 SRC_DIR := src
 BIN_DIR := bin
-JAR_NAME := lab2.jar
-MAIN_CLASS := AllocMain
+JAR_NAME := schedule.jar
+MAIN_CLASS := ScheduleMain
 CLASSPATH := .
 
 # Create list of sources and corresponding class files

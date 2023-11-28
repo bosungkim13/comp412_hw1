@@ -29,7 +29,7 @@ public class ScheduleMain {
      * - x <name> ----> scan, parse, rename, and print ILOC of the input block
      */
     public static void main(String[] args) {
-        args = new String[] {"src/tests/cc1.i"};
+//        args = new String[] {"src/tests/cc1.i"};
         flagVal = new HashMap<>();
         flagVal.put("-h", 2);
         flagVal.put("-s", 1);
@@ -87,9 +87,6 @@ public class ScheduleMain {
         String currFlag = null;
         String filename = null;
         if (args.length == 0 || args[0].equalsIgnoreCase(H_FLAG)) {
-            currFlag = H_FLAG;
-        }
-        if (args[0].equalsIgnoreCase(H_FLAG)) {
             currFlag = H_FLAG;
         } else {
             currFlag = S_FLAG;
