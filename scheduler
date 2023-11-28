@@ -1,2 +1,2 @@
 #!/bin/bash
-java -jar scheduler.jar $@
+java -jar schedule.jar $@
