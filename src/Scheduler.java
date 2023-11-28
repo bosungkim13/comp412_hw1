@@ -176,7 +176,7 @@ public class Scheduler {
             }
         }
 
-        // Print the final schedule
+        // Print the final scheduler
         for (GraphNode[] i : finalSchedule) {
             StringBuilder resBuilder = new StringBuilder();
             resBuilder.append("[");

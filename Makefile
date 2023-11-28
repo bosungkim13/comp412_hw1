@@ -12,7 +12,7 @@
 # Variables
 SRC_DIR := src
 BIN_DIR := bin
-JAR_NAME := schedule.jar
+JAR_NAME := scheduler.jar
 MAIN_CLASS := ScheduleMain
 CLASSPATH := .
 
