@@ -12,8 +12,11 @@ public class Scheduler {
     private List<GraphNode> destNodes;
     private List<GraphNode> ready;
     private List<GraphNode> active;
-    private List<List<GraphNode>> finalSchedule;
+    private List<GraphNode[]> finalSchedule;
     private Map<GraphNode, Integer> priorityMap;
+    private boolean f0Available;
+    private boolean f1Available;
+    private boolean didOutput;
 
     public Scheduler(Map<GraphNode, List<GraphEdge>> edgeMap) {
         this.edgeMap = edgeMap;
@@ -103,28 +106,56 @@ public class Scheduler {
         // loop while there are nodes that are ready and nodes are being processed/are active
         while (!active.isEmpty() || !ready.isEmpty()) {
             // insert a nop if there are no nodes ready to be scheduled
-            List<GraphNode> currOps = new ArrayList<>();
+            GraphNode[] currOps = new GraphNode[2];
+            GraphNode nop = new GraphNode(finalSchedule.size(), "nop");
+            nop.setOp("nop");
             if (ready.isEmpty()) {
-                GraphNode nop = new GraphNode(finalSchedule.size(), "nop");
-                nop.setOp("nop");
-                currOps.add(nop);
-                currOps.add(nop);
+                currOps[0] = nop;
+                currOps[1] = nop;
             } else {
                 // node with highest priority is selected
-                int counter = 0;
-                int highestPriority = 0;
-                GraphNode selectedNode = null;
-                for (GraphNode n : ready) {
-                    if (n.getPriority() > highestPriority) {
-                        highestPriority = n.getPriority();
-                        selectedNode = n;
+                this.f0Available = true;
+                this.f1Available = true;
+                this.didOutput = false;
+                GraphNode f0 = null;
+                GraphNode f1 = null;
+                while (!ready.isEmpty() && (this.f0Available || this.f1Available)) {
+                    int highestPriority = 0;
+                    GraphNode selectedNode = null;
+                    for (GraphNode n : ready) {
+                        if (n.getPriority() > highestPriority) {
+                            highestPriority = n.getPriority();
+                            selectedNode = n;
+                        }
+                    }
+                    assert selectedNode != null;
+                    Object[] canExecuteResult = this.canExecute(selectedNode);
+                    if ((boolean) canExecuteResult[0]) {
+                        if ((int) canExecuteResult[1] == 0) {
+                            f0 = selectedNode;
+                            ready.remove(f0);
+                            active.add(f0);
+                            f0.setIssueCycle(currentCycle);
+                            currOps[0] = f0;
+                        } else {
+                            f1 = selectedNode;
+                            ready.remove(f1);
+                            active.add(f1);
+                            f1.setIssueCycle(currentCycle);
+                            currOps[1] = f1;
+                        }
                     }
                 }
-                ready.remove(selectedNode);
-                active.add(selectedNode);
-                assert selectedNode != null;
-                selectedNode.setIssueCycle(currentCycle);
-                finalSchedule.add(selectedNode);
+                // if we did an output then need to reset f1 boolean to add a nop
+                if (this.didOutput) {
+                    this.f1Available = true;
+                }
+                if (f0Available) {
+                    currOps[0] = nop;
+                }
+                if (f1Available) {
+                    currOps[1] = nop;
+                }
             }
             finalSchedule.add(currOps);
             currentCycle++;
@@ -146,9 +177,58 @@ public class Scheduler {
         }
 
         // Print the final schedule
-        for (GraphNode i : finalSchedule) {
-            System.out.println(i.getOp());
+        for (GraphNode[] i : finalSchedule) {
+            StringBuilder resBuilder = new StringBuilder();
+            resBuilder.append("[");
+            resBuilder.append(i[0].getOp());
+            resBuilder.append(",");
+            resBuilder.append(i[1].getOp());
+            resBuilder.append("]");
+            String res = resBuilder.toString();
+            System.out.println(res);
         }
     }
 
+    private Object[] canExecute(GraphNode node) {
+        // check if node can execute
+        // return boolean to signify if it can AND which unit it occupies
+        switch (node.getOp()) {
+            case "load":
+            case "store":
+                if (this.f0Available) {
+                    this.f0Available = false;
+                    return new Object[]{true, 0};
+                } else {
+                    return new Object[]{false, 0};
+                }
+            case "mult":
+                if (this.f1Available) {
+                    this.f1Available = false;
+                    return new Object[]{true, 1};
+                } else {
+                    return new Object[]{false, 1};
+                }
+            case "output":
+                if (this.f1Available && this.f0Available) {
+                    this.f1Available = false;
+                    this.f0Available = false;
+                    this.didOutput = true;
+                    // always put output in unit 0
+                    return new Object[]{true, 0};
+                } else {
+                    return new Object[]{false, 0};
+                }
+            default:
+                // check for f1 or f2 and return
+                if (this.f0Available) {
+                    this.f0Available = false;
+                    return new Object[]{true, 0};
+                } else if (this.f1Available) {
+                    this.f1Available = false;
+                    return new Object[]{true, 1};
+                } else {
+                    return new Object[]{false, 1};
+                }
+        }
+    }
 }

@@ -20,7 +20,7 @@ public class Grapher {
     private List<Object[]> prevMemOps;
     private Map<String, Integer> typeLatency;
     private IntermediateNode currNode;
-    private boolean debug = true;
+    private boolean debug = false;
 
     public Map<GraphNode, List<GraphEdge>> getNodeEdgeMap() {
         return this.nodeEdgeMap;

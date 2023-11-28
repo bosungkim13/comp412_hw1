@@ -42,7 +42,6 @@ public class ScheduleMain {
                 commandHelp();
                 break;
             case S_FLAG:
-                int numRegisters = 200000;
                 scanner = new Scanner(parsedArgs[1]);
                 if (!scanner.openFile()) {
                     return;
@@ -56,14 +55,14 @@ public class ScheduleMain {
                     renamer.addVirtualRegisters();
 //                    Allocator allocator = new Allocator(representation, numRegisters, renamer.getVrName(), renamer.getMaxLive());
 //                    allocator.allocate();
-                    System.out.print(representation.getILoc());
-                    System.out.println("--------------------------------------------");
+//                    System.out.print(representation.getILoc());
+//                    System.out.println("--------------------------------------------");
                     Grapher grapher = new Grapher(representation);
                     grapher.buildGraph();
 
                     Scheduler scheduler = new Scheduler(grapher.getNodeEdgeMap());
                     scheduler.computePriorities();
-                    grapher.printGraph();
+//                    grapher.printGraph();
                     scheduler.createSchedule();
 //                    System.out.print(representation.getPRCode());
                 } else {
