@@ -17,6 +17,7 @@ public class Scheduler {
     private boolean f0Available;
     private boolean f1Available;
     private boolean didOutput;
+    private boolean debug = true;
 
     public Scheduler(Map<GraphNode, List<GraphEdge>> edgeMap) {
         this.edgeMap = edgeMap;
@@ -48,14 +49,17 @@ public class Scheduler {
 //        GraphNode rootNode = null;
         // find node that does not rely on any dependency as root node
         List<GraphNode> rootList = new ArrayList<>();
+        List<GraphNode> nonRootList = new ArrayList<>();
         for (GraphNode node : edgeMap.keySet()) {
             if (node.getNumParents() == 0) {
                 rootList.add(node);
+            } else {
+                nonRootList.add(node);
             }
         }
         if (!rootList.isEmpty()) {
             for (GraphNode rootNode : rootList) {
-                for (GraphNode targetNode : edgeMap.keySet()) {
+                for (GraphNode targetNode : nonRootList) {
                     computeMaxPriority(rootNode, targetNode);
                 }
             }
@@ -81,6 +85,9 @@ public class Scheduler {
             }
         }
         priorityMap.put(targetNode, targetNode.getMaxLatencyPathValue());
+        if (targetNode.getMaxLatencyPathValue() == null) {
+            System.out.println();
+        }
         targetNode.setPriority(targetNode.getMaxLatencyPathValue());
     }
 
@@ -119,8 +126,9 @@ public class Scheduler {
                 this.didOutput = false;
                 GraphNode f0 = null;
                 GraphNode f1 = null;
+                ArrayList<GraphNode> skippedNodes = new ArrayList<>();
                 while (!ready.isEmpty() && (this.f0Available || this.f1Available)) {
-                    int highestPriority = 0;
+                    int highestPriority = -1;
                     GraphNode selectedNode = null;
                     for (GraphNode n : ready) {
                         if (n.getPriority() > highestPriority) {
@@ -144,8 +152,15 @@ public class Scheduler {
                             f1.setIssueCycle(currentCycle);
                             currOps[1] = f1;
                         }
+                    } else {
+                        // remove the selected node that cannot be activated to a list to add back after current ops are
+                        // scheduled
+                        skippedNodes.add(selectedNode);
+                        ready.remove(selectedNode);
                     }
                 }
+                // add the skipped nodes back to the ready list
+                ready.addAll(skippedNodes);
                 // if we did an output then need to reset f1 boolean to add a nop
                 if (this.didOutput) {
                     this.f1Available = true;
@@ -177,8 +192,12 @@ public class Scheduler {
         }
 
         // Print the final scheduler
+        int cycle = 0;
         for (GraphNode[] i : finalSchedule) {
             StringBuilder resBuilder = new StringBuilder();
+            if (this.debug) {
+                resBuilder.append(cycle);
+            }
             resBuilder.append("[ ");
             resBuilder.append(i[0].getOp());
             resBuilder.append(" ; ");
@@ -186,13 +205,17 @@ public class Scheduler {
             resBuilder.append(" ]");
             String res = resBuilder.toString();
             System.out.println(res);
+            cycle += 1;
         }
     }
 
     private Object[] canExecute(GraphNode node) {
         // check if node can execute
         // return boolean to signify if it can AND which unit it occupies
-        switch (node.getOp()) {
+        if (node == null) {
+            System.out.println();
+        }
+        switch (node.getOpCode()) {
             case "load":
             case "store":
                 if (this.f0Available) {
