@@ -17,7 +17,7 @@ public class Scheduler {
     private boolean f0Available;
     private boolean f1Available;
     private boolean didOutput;
-    private boolean debug = true;
+    private boolean debug = false;
 
     public Scheduler(Map<GraphNode, List<GraphEdge>> edgeMap) {
         this.edgeMap = edgeMap;
@@ -85,9 +85,6 @@ public class Scheduler {
             }
         }
         priorityMap.put(targetNode, targetNode.getMaxLatencyPathValue());
-        if (targetNode.getMaxLatencyPathValue() == null) {
-            System.out.println();
-        }
         targetNode.setPriority(targetNode.getMaxLatencyPathValue());
     }
 
