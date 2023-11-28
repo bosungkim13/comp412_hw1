@@ -179,11 +179,11 @@ public class Scheduler {
         // Print the final scheduler
         for (GraphNode[] i : finalSchedule) {
             StringBuilder resBuilder = new StringBuilder();
-            resBuilder.append("[");
+            resBuilder.append("[ ");
             resBuilder.append(i[0].getOp());
-            resBuilder.append(",");
+            resBuilder.append(" ; ");
             resBuilder.append(i[1].getOp());
-            resBuilder.append("]");
+            resBuilder.append(" ]");
             String res = resBuilder.toString();
             System.out.println(res);
         }
