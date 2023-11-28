@@ -4,6 +4,7 @@ import common.GraphUtils.GraphNode;
 import common.IntermediateRepresentation.IntermediateList;
 import common.IntermediateRepresentation.IntermediateNode;
 import common.IntermediateRepresentation.IntermediateStoreNode;
+import sun.security.krb5.internal.HostAddress;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -19,6 +20,7 @@ public class Grapher {
     private List<Object[]> prevMemOps;
     private Map<String, Integer> typeLatency;
     private IntermediateNode currNode;
+    private boolean debug = true;
 
     public Map<GraphNode, List<GraphEdge>> getNodeEdgeMap() {
         return this.nodeEdgeMap;
@@ -37,6 +39,7 @@ public class Grapher {
         this.edges = new ArrayList<>();
         this.prevMemOps = new ArrayList<>();
         this.typeLatency = new HashMap<>();
+        this.IR2graph = new HashMap<>();
         this.currNode = this.IR.getHead().getNext();
         // Initialize typeLatency map
         this.typeLatency.put("load", 5);
@@ -53,12 +56,15 @@ public class Grapher {
 
     public void buildGraph() {
         IntermediateNode tailNode = IR.getTail();
-        while (currNode != tailNode) {
-            String currentOpcode = currNode.getLexeme();
+        while (this.currNode != tailNode) {
+            String currentOpcode = this.currNode.getLexeme();
+            if (currentOpcode.equals("nop")) {
+                this.currNode = this.currNode.getNext();
+                continue;
+            }
             int currRegVal;
             List<Integer> defs = new ArrayList<>();
             List<Integer> uses = new ArrayList<>();
-            // 1 = lexeme, 2 = source register 0, 3 = virtual register 0, 7 = virtual register 1, 11 = virtual register 1 or 2,
             int numOps = 3;
             int currOpcode = currNode.getOpCode();
 
@@ -97,7 +103,7 @@ public class Grapher {
             GraphNode graphNode = new GraphNode(nodeNum, currentOpcode);
             IR2graph.put(this.currNode, graphNode);
             graphNode.setLatency(typeLatency.get(currentOpcode));
-            graphNode.setOp(currNode.getPRrep());
+            graphNode.setOp(currNode.getILOCRepresentation());
 
             // TODO: creating graph
             // initialize adjacency list for new graph node
@@ -117,6 +123,7 @@ public class Grapher {
                 }
                 // create new data edge and add it to the edges for the current node
                 GraphEdge graphEdge = new GraphEdge(reg2Node.get(u), "data", typeLatency.get(currentOpcode));
+                reg2Node.get(u).addParent(graphNode);
                 // add to adjacency list
                 nodeEdgeMap.get(graphNode).add(graphEdge);
                 // add to a list of all edges
@@ -127,33 +134,33 @@ public class Grapher {
             // TODO: Currently making edges to all previous memops.
             if (Arrays.asList("load", "store", "output").contains(currentOpcode)) {
                 // loop through previous memory operations
-                for (Object[] prevMemOp : prevMemOps) {
-                    String destOp = (String) prevMemOp[1];
-                    GraphNode destNode = (GraphNode) prevMemOp[0];
-                    if (Arrays.asList("load", "store", "output").contains(destOp) && currentOpcode.equals("store")) {
-                        // add serial edge to ensure that store does not proceed until previous operation is complete
-                        GraphEdge graphEdge = new GraphEdge(destNode, "serial", typeLatency.get(currentOpcode));
-                        nodeEdgeMap.get(graphNode).add(graphEdge);
-                    } else if (destOp.equals("store") && Arrays.asList("load", "output").contains(currentOpcode)) {
-                        // load and output need an edge to the most recent store
-                        GraphEdge graphEdge = new GraphEdge(destNode, "conflict", typeLatency.get(currentOpcode));
-                        nodeEdgeMap.get(graphNode).add(graphEdge);
-                    } else if (destOp.equals("output") && currentOpcode.equals("output")) {
-                        // serial edge for output to output
-                        GraphEdge graphEdge = new GraphEdge(destNode, "serial", typeLatency.get(currentOpcode));
-                        nodeEdgeMap.get(graphNode).add(graphEdge);
-                    }
-                }
-                prevMemOps.add(new Object[]{graphNode, currentOpcode});
+//                for (Object[] prevMemOp : prevMemOps) {
+//                    String destOp = (String) prevMemOp[1];
+//                    GraphNode destNode = (GraphNode) prevMemOp[0];
+//                    if (Arrays.asList("load", "store", "output").contains(destOp) && currentOpcode.equals("store")) {
+//                        // add serial edge to ensure that store does not proceed until previous operation is complete
+//                        GraphEdge graphEdge = new GraphEdge(destNode, "serial", typeLatency.get(currentOpcode));
+//                        nodeEdgeMap.get(graphNode).add(graphEdge);
+//                    } else if (destOp.equals("store") && Arrays.asList("load", "output").contains(currentOpcode)) {
+//                        // load and output need an edge to the most recent store
+//                        GraphEdge graphEdge = new GraphEdge(destNode, "conflict", typeLatency.get(currentOpcode));
+//                        nodeEdgeMap.get(graphNode).add(graphEdge);
+//                    } else if (destOp.equals("output") && currentOpcode.equals("output")) {
+//                        // serial edge for output to output
+//                        GraphEdge graphEdge = new GraphEdge(destNode, "serial", typeLatency.get(currentOpcode));
+//                        nodeEdgeMap.get(graphNode).add(graphEdge);
+//                    }
+//                }
+//                prevMemOps.add(new Object[]{graphNode, currentOpcode});
+                this.doSerialConflict(graphNode);
             }
-            currNode = currNode.getNext();
+            this.currNode = this.currNode.getNext();
             nodeNum++;
         }
     }
 
     private void doSerialConflict(GraphNode currGraphNode) {
         String lex = this.currNode.getLexeme();
-
         int opCode = this.currNode.getOpCode();
 
         List<GraphEdge> edges = this.nodeEdgeMap.get(currGraphNode);
@@ -174,17 +181,20 @@ public class Grapher {
                     edge = new GraphEdge(prevStore, "conflict", this.typeLatency.get(prevStore.getOpCode()));
                 }
                 edges.add(edge);
+                prevStore.addParent(currGraphNode);
             }
         } else if (lex.equals("output")) {
             GraphNode prevStore = this.getLastNode("store", currIsStore);
             if (prevStore != null) {
                 GraphEdge edge = new GraphEdge(prevStore, "conflict", this.typeLatency.get(prevStore.getOpCode()));
                 edges.add(edge);
+                prevStore.addParent(currGraphNode);
             }
             GraphNode prevOutput = this.getLastNode("output", currIsStore);
             if (prevOutput != null) {
                 GraphEdge edge = new GraphEdge(prevOutput, "serial", 1);
                 edges.add(edge);
+                prevOutput.addParent(currGraphNode);
             }
         } else {
             System.err.println("Invalid lex for doSerialConflict()");
@@ -201,6 +211,9 @@ public class Grapher {
         while (iterNode != this.IR.getHead()) {
             String currLex = iterNode.getLexeme();
             if (currLex.equals(lex)) {
+                if (this.debug) {
+                    System.out.println("Last node for " + this.currNode.getILOCRepresentation() + " is " + iterNode.getILOCRepresentation());
+                }
                 return this.IR2graph.get(iterNode);
             }
             if (currIsStore) {
@@ -215,9 +228,19 @@ public class Grapher {
                     }
                 }
             }
-            currNode = currNode.getPrev();
+            iterNode = iterNode.getPrev();
         }
         return null;
+    }
 
+    public void printGraph() {
+        for (GraphNode node: this.nodeEdgeMap.keySet()) {
+            System.out.println(node.getPriority() + " " + node.getOpCode());
+            System.out.println("Children:");
+            for (GraphEdge childEdge : this.nodeEdgeMap.get(node)) {
+                System.out.println(childEdge.getDestinationNode().getPriority() + " " + childEdge.getDestinationNode().getOpCode());
+            }
+            System.out.println();
+        }
     }
 }

@@ -54,12 +54,16 @@ public class ScheduleMain {
                     IntermediateList representation = parser.getIRList();
                     Renamer renamer = new Renamer(representation, parser.getMaxSourceReg());
                     renamer.addVirtualRegisters();
-                    Allocator allocator = new Allocator(representation, numRegisters, renamer.getVrName(), renamer.getMaxLive());
-                    allocator.allocate();
+//                    Allocator allocator = new Allocator(representation, numRegisters, renamer.getVrName(), renamer.getMaxLive());
+//                    allocator.allocate();
+                    System.out.print(representation.getILoc());
+                    System.out.println("--------------------------------------------");
                     Grapher grapher = new Grapher(representation);
                     grapher.buildGraph();
-                    Scheduler scheduler = new Scheduler(grapher.getNodeEdgeMap(), grapher.getEdges());
+
+                    Scheduler scheduler = new Scheduler(grapher.getNodeEdgeMap());
                     scheduler.computePriorities();
+                    grapher.printGraph();
                     scheduler.createSchedule();
 //                    System.out.print(representation.getPRCode());
                 } else {

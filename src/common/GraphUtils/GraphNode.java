@@ -1,5 +1,11 @@
 package common.GraphUtils;
 
+
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
 public class GraphNode {
     private int opNumber;
     private String opCode;
@@ -11,6 +17,7 @@ public class GraphNode {
     private boolean offActive;
     private boolean isReady;
     private Integer delay; // Can be null
+    private Set<GraphNode> parents;
 
     public GraphNode(Integer opNumber, String opCode) {
         this.opNumber = opNumber;
@@ -23,9 +30,16 @@ public class GraphNode {
         this.offActive = false;
         this.isReady = false;
         this.delay = null;
+        this.parents = new HashSet<>();
     }
 
     // Getters
+    public Set<GraphNode> getParents() {
+        return this.parents;
+    }
+    public int getNumParents() {
+        return this.parents.size();
+    }
     public int getOpNumber() {
         return opNumber;
     }
@@ -83,8 +97,10 @@ public class GraphNode {
         this.latency = latency;
     }
 
-    public void setMaxLatencyPathValue(Integer maxLatencyPathValue) {
-        this.maxLatencyPathValue = maxLatencyPathValue;
+    public void setMaxLatencyPathValue(Integer potentialLatency) {
+        if (this.maxLatencyPathValue == null || potentialLatency > this.maxLatencyPathValue) {
+            this.maxLatencyPathValue = potentialLatency;
+        }
     }
 
     public void setPriority(int priority) {
@@ -105,6 +121,10 @@ public class GraphNode {
 
     public void setDelay(Integer delay) {
         this.delay = delay;
+    }
+
+    public void addParent(GraphNode parent) {
+        this.parents.add(parent);
     }
 }
 

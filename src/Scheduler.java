@@ -1,22 +1,22 @@
+import com.sun.corba.se.impl.orbutil.graph.Graph;
 import common.GraphUtils.GraphEdge;
 import common.GraphUtils.GraphNode;
 
 import java.util.*;
 
 public class Scheduler {
-    private Map<GraphNode, List<GraphEdge>> map;
+    private Map<GraphNode, List<GraphEdge>> edgeMap;
     private List<GraphNode[]> edges;
     private Map<String, Integer> typeLatency;
     private int currentCycle;
     private List<GraphNode> destNodes;
     private List<GraphNode> ready;
     private List<GraphNode> active;
-    private List<GraphNode> finalSchedule;
+    private List<List<GraphNode>> finalSchedule;
     private Map<GraphNode, Integer> priorityMap;
 
-    public Scheduler(Map<GraphNode, List<GraphEdge>> map, List<GraphNode[]> edges) {
-        this.map = map;
-        this.edges = edges;
+    public Scheduler(Map<GraphNode, List<GraphEdge>> edgeMap) {
+        this.edgeMap = edgeMap;
         this.typeLatency = new HashMap<>();
         // Initialize typeLatency map
         this.typeLatency.put("load", 5);
@@ -39,22 +39,25 @@ public class Scheduler {
     }
 
     public void computePriorities() {
-        for (GraphNode[] e : edges) {
-            destNodes.add(e[0]);
-        }
-        GraphNode rootNode = null;
-        // find node that does not rely on any dependecy as root node
-        // TODO: is it possible to improve the selection of the root node??? check if there are multiple options
-        for (GraphNode node : map.keySet()) {
-            if (!destNodes.contains(node)) {
-                rootNode = node;
-                break;
+//        for (GraphNode[] e : edges) {
+//            destNodes.add(e[0]);
+//        }
+//        GraphNode rootNode = null;
+        // find node that does not rely on any dependency as root node
+        List<GraphNode> rootList = new ArrayList<>();
+        for (GraphNode node : edgeMap.keySet()) {
+            if (node.getNumParents() == 0) {
+                rootList.add(node);
             }
         }
-        if (rootNode != null) {
-            for (GraphNode targetNode : map.keySet()) {
-                computeMaxPriority(rootNode, targetNode);
+        if (!rootList.isEmpty()) {
+            for (GraphNode rootNode : rootList) {
+                for (GraphNode targetNode : edgeMap.keySet()) {
+                    computeMaxPriority(rootNode, targetNode);
+                }
             }
+        } else {
+            System.out.println("Invalid dependency graph: no roots");
         }
     }
 
@@ -65,13 +68,10 @@ public class Scheduler {
         while (!queue.isEmpty()) {
             GraphNode currNode = queue.poll();
             int currentValue = currNode.getMaxLatencyPathValue();
-            for (GraphEdge neighbor : map.get(currNode)) {
+            for (GraphEdge neighbor : edgeMap.get(currNode)) {
                 GraphNode neighborNode = neighbor.getDestinationNode();
                 int potentialLatency = currentValue + neighborNode.getLatency();
-                if (neighborNode.getMaxLatencyPathValue() == null ||
-                        potentialLatency > neighborNode.getMaxLatencyPathValue()) {
-                    neighborNode.setMaxLatencyPathValue(potentialLatency);
-                }
+                neighborNode.setMaxLatencyPathValue(potentialLatency);
                 if (!neighborNode.equals(targetNode)) {
                     queue.add(neighborNode);
                 }
@@ -83,21 +83,19 @@ public class Scheduler {
 
     private boolean isReady(GraphNode node, List<GraphNode> active) {
         // Add all edges originating from node
-        for (GraphEdge x : map.get(node)) {
+        for (GraphEdge x : edgeMap.get(node)) {
             GraphNode nodeX = x.getDestinationNode();
-            if (x.getEdgeType().equals("serial") && active.contains(nodeX)) {
-                return true;
-            }
-            if (nodeX.isOffActive()) {
-                return true;
+            // first part handles serial edges. offActive handles conflict and data edges
+            if (!(x.getEdgeType().equals("serial") && active.contains(nodeX)) && !nodeX.isOffActive()) {
+                return false;
             }
         }
-        return false;
+        return true;
     }
 
     public void createSchedule() {
         // Add all nodes with no dependencies to ready list
-        for (Map.Entry<GraphNode, List<GraphEdge>> entry : map.entrySet()) {
+        for (Map.Entry<GraphNode, List<GraphEdge>> entry : this.edgeMap.entrySet()) {
             if (entry.getValue().isEmpty()) {
                 ready.add(entry.getKey());
             }
@@ -105,12 +103,15 @@ public class Scheduler {
         // loop while there are nodes that are ready and nodes are being processed/are active
         while (!active.isEmpty() || !ready.isEmpty()) {
             // insert a nop if there are no nodes ready to be scheduled
+            List<GraphNode> currOps = new ArrayList<>();
             if (ready.isEmpty()) {
                 GraphNode nop = new GraphNode(finalSchedule.size(), "nop");
                 nop.setOp("nop");
-                finalSchedule.add(nop);
+                currOps.add(nop);
+                currOps.add(nop);
             } else {
                 // node with highest priority is selected
+                int counter = 0;
                 int highestPriority = 0;
                 GraphNode selectedNode = null;
                 for (GraphNode n : ready) {
@@ -125,6 +126,7 @@ public class Scheduler {
                 selectedNode.setIssueCycle(currentCycle);
                 finalSchedule.add(selectedNode);
             }
+            finalSchedule.add(currOps);
             currentCycle++;
 
             // Process active nodes
@@ -134,9 +136,9 @@ public class Scheduler {
                     active.remove(o);
                     o.setOffActive(true);
                     // check for nodes that are dependent on the completed node. If so, add to ready list
-                    for (GraphEdge d : map.get(o)) {
-                        if (isReady(d.getDestinationNode(), active)) {
-                            ready.add(d.getDestinationNode());
+                    for (GraphNode d : o.getParents()) {
+                        if (isReady(d, active)) {
+                            ready.add(d);
                         }
                     }
                 }
