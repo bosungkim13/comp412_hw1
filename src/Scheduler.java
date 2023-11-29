@@ -16,7 +16,7 @@ public class Scheduler {
     private boolean f0Available;
     private boolean f1Available;
     private boolean didOutput;
-    private boolean debug = true;
+    private boolean debug = false;
 
     public Scheduler(Map<GraphNode, List<GraphEdge>> edgeMap) {
         this.edgeMap = edgeMap;
