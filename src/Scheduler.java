@@ -239,6 +239,12 @@ public class Scheduler {
                 }
             }
             finalSchedule.add(currOps);
+//            String res = "[ " +
+//                    currOps[0].getOp() +
+//                    " ; " +
+//                    currOps[1].getOp() +
+//                    " ]";
+//            System.out.println(res);
             currentCycle++;
 
             // Process active nodes
@@ -258,21 +264,21 @@ public class Scheduler {
         }
 
         // Print the final scheduler
-        int cycle = 0;
-        for (GraphNode[] i : finalSchedule) {
-            StringBuilder resBuilder = new StringBuilder();
-            if (this.debug) {
-                resBuilder.append(cycle);
-            }
-            resBuilder.append("[ ");
-            resBuilder.append(i[0].getOp());
-            resBuilder.append(" ; ");
-            resBuilder.append(i[1].getOp());
-            resBuilder.append(" ]");
-            String res = resBuilder.toString();
-            System.out.println(res);
-            cycle += 1;
-        }
+//        int cycle = 0;
+//        for (GraphNode[] i : finalSchedule) {
+//            StringBuilder resBuilder = new StringBuilder();
+//            if (this.debug) {
+//                resBuilder.append(cycle);
+//            }
+//            resBuilder.append("[ ");
+//            resBuilder.append(i[0].getOp());
+//            resBuilder.append(" ; ");
+//            resBuilder.append(i[1].getOp());
+//            resBuilder.append(" ]");
+//            String res = resBuilder.toString();
+//            System.out.println(res);
+//            cycle += 1;
+//        }
 //        System.out.println("cycles: "+cycle);
     }
 
