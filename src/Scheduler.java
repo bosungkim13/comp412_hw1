@@ -117,7 +117,7 @@ public class Scheduler {
 //        }
 //        return count;
 //    }
-//sdafkljjdskal;fadfsk;jl;kadsfkl;jfds
+
     public void computePriorities() {
         // find node that does not rely on any dependency as root node
         List<GraphNode> rootList = new ArrayList<>();
@@ -281,15 +281,6 @@ public class Scheduler {
                     return new Object[]{false, 1};
                 }
             case "output":
-//                if (this.f1Available && this.f0Available) {
-//                    this.f1Available = false;
-//                    this.f0Available = false;
-//                    this.didOutput = true;
-//                    // always put output in unit 0
-//                    return new Object[]{true, 0};
-//                } else {
-//                    return new Object[]{false, 0};
-//                }
                 if (this.f1Available && !this.didOutput) {
                     this.f1Available = false;
                     this.didOutput = true;

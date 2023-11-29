@@ -131,7 +131,6 @@ public class Grapher {
             }
 
             // Logic for memops
-            // TODO: Currently making edges to all previous memops.
             if (Arrays.asList("load", "store", "output").contains(currentOpcode)) {
 //                // loop through previous memory operations
 //                for (Object[] prevMemOp : prevMemOps) {
