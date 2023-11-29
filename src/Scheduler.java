@@ -60,7 +60,7 @@ public class Scheduler {
         // Calculate priority for each node
         for (GraphNode node : edgeMap.keySet()) {
             int descendantCount = countDescendants(node);
-            int priority = 10 * node.getMaxLatencyPathValue() + descendantCount;
+            int priority = 2 * node.getMaxLatencyPathValue() + descendantCount;
             node.setPriority(priority);
         }
     }
