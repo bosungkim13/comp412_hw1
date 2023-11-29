@@ -10,14 +10,13 @@ public class Scheduler {
     private Map<String, Integer> typeLatency;
     private int currentCycle;
     private List<GraphNode> destNodes;
-    private List<GraphNode> ready;
-    private List<GraphNode> active;
+    private Set<GraphNode> ready;
+    private Set<GraphNode> active;
     private List<GraphNode[]> finalSchedule;
-    private Map<GraphNode, Integer> priorityMap;
     private boolean f0Available;
     private boolean f1Available;
     private boolean didOutput;
-    private boolean debug = false;
+    private boolean debug = true;
 
     public Scheduler(Map<GraphNode, List<GraphEdge>> edgeMap) {
         this.edgeMap = edgeMap;
@@ -36,10 +35,9 @@ public class Scheduler {
 
         this.currentCycle = 1;
         this.destNodes = new ArrayList<>();
-        this.ready = new ArrayList<>();
-        this.active = new ArrayList<>();
+        this.ready = new HashSet<>();
+        this.active = new HashSet<>();
         this.finalSchedule = new ArrayList<>();
-        this.priorityMap = new HashMap<>();
     }
 
     public void computePriorities() {
@@ -49,50 +47,57 @@ public class Scheduler {
 //        GraphNode rootNode = null;
         // find node that does not rely on any dependency as root node
         List<GraphNode> rootList = new ArrayList<>();
-        List<GraphNode> nonRootList = new ArrayList<>();
+//        List<GraphNode> nonRootList = new ArrayList<>();
         for (GraphNode node : edgeMap.keySet()) {
             if (node.getNumParents() == 0) {
                 rootList.add(node);
-            } else {
-                nonRootList.add(node);
             }
+//            } else {
+//                nonRootList.add(node);
+//            }
         }
         if (!rootList.isEmpty()) {
             for (GraphNode rootNode : rootList) {
-                for (GraphNode targetNode : nonRootList) {
-                    computeMaxPriority(rootNode, targetNode);
-                }
+                computeMaxPriority(rootNode);
             }
         } else {
             System.out.println("Invalid dependency graph: no roots");
         }
     }
 
-    private void computeMaxPriority(GraphNode rootNode, GraphNode targetNode) {
+    private void computeMaxPriority(GraphNode rootNode) {
         Queue<GraphNode> queue = new LinkedList<>();
         queue.add(rootNode);
         rootNode.setMaxLatencyPathValue(rootNode.getLatency());
+        // TODO: changing the priority to be more than just path latency
+        rootNode.setPriority(rootNode.getMaxLatencyPathValue());
         while (!queue.isEmpty()) {
             GraphNode currNode = queue.poll();
+            // TODO: changing the priority to be more than just path latency
             int currentValue = currNode.getMaxLatencyPathValue();
+            currNode.setPriority(currNode.getMaxLatencyPathValue());
             for (GraphEdge neighbor : edgeMap.get(currNode)) {
                 GraphNode neighborNode = neighbor.getDestinationNode();
                 int potentialLatency = currentValue + neighborNode.getLatency();
                 neighborNode.setMaxLatencyPathValue(potentialLatency);
-                if (!neighborNode.equals(targetNode)) {
-                    queue.add(neighborNode);
-                }
+                queue.add(neighborNode);
             }
         }
-        priorityMap.put(targetNode, targetNode.getMaxLatencyPathValue());
-        targetNode.setPriority(targetNode.getMaxLatencyPathValue());
+//        if (targetNode.getMaxLatencyPathValue() == null) {
+//            System.out.println();
+//        }
+//        targetNode.setPriority(targetNode.getMaxLatencyPathValue());
     }
 
-    private boolean isReady(GraphNode node, List<GraphNode> active) {
+    private boolean isReady(GraphNode node, Set<GraphNode> active) {
         // Add all edges originating from node
         for (GraphEdge x : edgeMap.get(node)) {
             GraphNode nodeX = x.getDestinationNode();
             // first part handles serial edges. offActive handles conflict and data edges
+//            if (!nodeX.isOffActive()) {
+//                return false;
+//            }
+
             if (!(x.getEdgeType().equals("serial") && active.contains(nodeX)) && !nodeX.isOffActive()) {
                 return false;
             }
@@ -113,6 +118,9 @@ public class Scheduler {
             GraphNode[] currOps = new GraphNode[2];
             GraphNode nop = new GraphNode(finalSchedule.size(), "nop");
             nop.setOp("nop");
+            if (currentCycle == 15) {
+                System.out.println();
+            }
             if (ready.isEmpty()) {
                 currOps[0] = nop;
                 currOps[1] = nop;
@@ -123,7 +131,7 @@ public class Scheduler {
                 this.didOutput = false;
                 GraphNode f0 = null;
                 GraphNode f1 = null;
-                ArrayList<GraphNode> skippedNodes = new ArrayList<>();
+                Set<GraphNode> skippedNodes = new HashSet<>();
                 while (!ready.isEmpty() && (this.f0Available || this.f1Available)) {
                     int highestPriority = -1;
                     GraphNode selectedNode = null;
@@ -173,14 +181,14 @@ public class Scheduler {
             currentCycle++;
 
             // Process active nodes
-            List<GraphNode> activeCopy = new ArrayList<>(active);
+            Set<GraphNode> activeCopy = new HashSet<>(active);
             for (GraphNode o : activeCopy) {
                 if (currentCycle == o.getIssueCycle() + o.getLatency()) {
                     active.remove(o);
                     o.setOffActive(true);
                     // check for nodes that are dependent on the completed node. If so, add to ready list
                     for (GraphNode d : o.getParents()) {
-                        if (isReady(d, active)) {
+                        if (!d.isOffActive() && isReady(d, active)) {
                             ready.add(d);
                         }
                     }

@@ -29,7 +29,7 @@ public class ScheduleMain {
      * - x <name> ----> scan, parse, rename, and print ILOC of the input block
      */
     public static void main(String[] args) {
-//        args = new String[] {"src/tests/report5.i"};
+        args = new String[] {"src/tests/report18.i"};
         flagVal = new HashMap<>();
         flagVal.put("-h", 2);
         flagVal.put("-s", 1);
@@ -62,7 +62,7 @@ public class ScheduleMain {
 
                     Scheduler scheduler = new Scheduler(grapher.getNodeEdgeMap());
                     scheduler.computePriorities();
-//                    grapher.printGraph();
+                    grapher.printGraph();
                     scheduler.createSchedule();
 //                    System.out.print(representation.getPRCode());
                 } else {

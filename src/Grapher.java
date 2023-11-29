@@ -235,10 +235,10 @@ public class Grapher {
 
     public void printGraph() {
         for (GraphNode node: this.nodeEdgeMap.keySet()) {
-            System.out.println(node.getPriority() + " " + node.getOpCode());
+            System.out.println(node.getPriority() + " " + node.getOp());
             System.out.println("Children:");
             for (GraphEdge childEdge : this.nodeEdgeMap.get(node)) {
-                System.out.println(childEdge.getDestinationNode().getPriority() + " " + childEdge.getDestinationNode().getOpCode());
+                System.out.println(childEdge.getDestinationNode().getPriority() + " " + childEdge.getDestinationNode().getOp());
             }
             System.out.println();
         }
