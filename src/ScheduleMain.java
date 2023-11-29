@@ -29,7 +29,7 @@ public class ScheduleMain {
      * - x <name> ----> scan, parse, rename, and print ILOC of the input block
      */
     public static void main(String[] args) {
-//        args = new String[] {"src/tests/report09.i"};
+//        args = new String[] {"src/tests/ehs2.i"};
         flagVal = new HashMap<>();
         flagVal.put("-h", 2);
         flagVal.put("-s", 1);

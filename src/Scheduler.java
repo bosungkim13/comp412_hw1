@@ -60,7 +60,13 @@ public class Scheduler {
         // Calculate priority for each node
         for (GraphNode node : edgeMap.keySet()) {
             int descendantCount = countDescendants(node);
-            int priority = 2 * node.getMaxLatencyPathValue() + descendantCount;
+            int priority;
+            if (node.getOpCode().equals("store")) {
+                priority = 10 * node.getMaxLatencyPathValue() + descendantCount;
+            } else {
+                priority = 10 * node.getMaxLatencyPathValue() + descendantCount;
+            }
+
             node.setPriority(priority);
         }
     }
@@ -222,9 +228,9 @@ public class Scheduler {
                 // add the skipped nodes back to the ready list
                 ready.addAll(skippedNodes);
                 // if we did an output then need to reset f1 boolean to add a nop
-                if (this.didOutput) {
-                    this.f1Available = true;
-                }
+//                if (this.didOutput) {
+//                    this.f1Available = true;
+//                }
                 if (f0Available) {
                     currOps[0] = nop;
                 }
@@ -267,14 +273,12 @@ public class Scheduler {
             System.out.println(res);
             cycle += 1;
         }
+//        System.out.println("cycles: "+cycle);
     }
 
     private Object[] canExecute(GraphNode node) {
         // check if node can execute
         // return boolean to signify if it can AND which unit it occupies
-        if (node == null) {
-            System.out.println();
-        }
         switch (node.getOpCode()) {
             case "load":
             case "store":
@@ -292,23 +296,34 @@ public class Scheduler {
                     return new Object[]{false, 1};
                 }
             case "output":
-                if (this.f1Available && this.f0Available) {
+//                if (this.f1Available && this.f0Available) {
+//                    this.f1Available = false;
+//                    this.f0Available = false;
+//                    this.didOutput = true;
+//                    // always put output in unit 0
+//                    return new Object[]{true, 0};
+//                } else {
+//                    return new Object[]{false, 0};
+//                }
+                if (this.f1Available && !this.didOutput) {
                     this.f1Available = false;
+                    this.didOutput = true;
+                    return new Object[]{true, 1};
+                } else if (this.f0Available && !this.didOutput) {
                     this.f0Available = false;
                     this.didOutput = true;
-                    // always put output in unit 0
                     return new Object[]{true, 0};
                 } else {
-                    return new Object[]{false, 0};
+                    return new Object[]{false, 1};
                 }
             default:
                 // check for f1 or f2 and return
-                if (this.f0Available) {
-                    this.f0Available = false;
-                    return new Object[]{true, 0};
-                } else if (this.f1Available) {
+                if (this.f1Available) {
                     this.f1Available = false;
                     return new Object[]{true, 1};
+                } else if (this.f0Available) {
+                    this.f0Available = false;
+                    return new Object[]{true, 0};
                 } else {
                     return new Object[]{false, 1};
                 }
