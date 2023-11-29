@@ -62,7 +62,7 @@ public class ScheduleMain {
 
                     Scheduler scheduler = new Scheduler(grapher.getNodeEdgeMap());
                     scheduler.computePriorities();
-                    grapher.printGraph();
+//                    grapher.printGraph();
                     scheduler.createSchedule();
 //                    System.out.print(representation.getPRCode());
                 } else {
