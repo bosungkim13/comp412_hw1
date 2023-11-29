@@ -133,7 +133,7 @@ public class Grapher {
             // Logic for memops
             // TODO: Currently making edges to all previous memops.
             if (Arrays.asList("load", "store", "output").contains(currentOpcode)) {
-                // loop through previous memory operations
+//                // loop through previous memory operations
 //                for (Object[] prevMemOp : prevMemOps) {
 //                    String destOp = (String) prevMemOp[1];
 //                    GraphNode destNode = (GraphNode) prevMemOp[0];
@@ -220,11 +220,13 @@ public class Grapher {
                 if (currLex.equals("output")) {
                     GraphEdge edge = new GraphEdge(IR2graph.get(iterNode), "serial", 1);
                     edges.add(edge);
+                    IR2graph.get(iterNode).addParent(currGraphNode);
                 } else if (currLex.equals("load")) {
                     List<GraphNode> children = edges.stream().map(GraphEdge::getDestinationNode).collect(Collectors.toList());
                     if (!children.contains(this.IR2graph.get(iterNode))) {
                         GraphEdge edge = new GraphEdge(this.IR2graph.get(iterNode),"serial", 1);
                         edges.add(edge);
+                        IR2graph.get(iterNode).addParent(currGraphNode);
                     }
                 }
             }
