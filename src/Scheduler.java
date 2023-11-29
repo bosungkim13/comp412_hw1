@@ -40,92 +40,15 @@ public class Scheduler {
         this.finalSchedule = new ArrayList<>();
     }
 
-    public void computePriorities() {
-        // Find nodes that do not rely on any dependency as root nodes
-        List<GraphNode> rootList = new ArrayList<>();
-        for (GraphNode node : edgeMap.keySet()) {
-            if (node.getNumParents() == 0) {
-                rootList.add(node);
-            }
-        }
-
-        if (!rootList.isEmpty()) {
-            for (GraphNode rootNode : rootList) {
-                computeMaxPriority(rootNode);
-            }
-        } else {
-            System.out.println("Invalid dependency graph: no roots");
-        }
-
-        // Calculate priority for each node
-        for (GraphNode node : edgeMap.keySet()) {
-            int descendantCount = countDescendants(node);
-            int priority;
-            if (node.getOpCode().equals("store")) {
-                priority = 10 * node.getMaxLatencyPathValue() + descendantCount;
-            } else {
-                priority = 10 * node.getMaxLatencyPathValue() + descendantCount;
-            }
-
-            node.setPriority(priority);
-        }
-    }
-
-    private void computeMaxPriority(GraphNode rootNode) {
-        Queue<GraphNode> queue = new LinkedList<>();
-        Set<GraphNode> visited = new HashSet<>();
-        queue.add(rootNode);
-        rootNode.setMaxLatencyPathValue(rootNode.getLatency());
-
-        while (!queue.isEmpty()) {
-            GraphNode currNode = queue.poll();
-            visited.add(currNode);
-            int currentValue = currNode.getMaxLatencyPathValue();
-
-            for (GraphEdge neighbor : edgeMap.get(currNode)) {
-                GraphNode neighborNode = neighbor.getDestinationNode();
-                int potentialLatency = currentValue + neighborNode.getLatency();
-                neighborNode.setMaxLatencyPathValue(potentialLatency);
-                if (!visited.contains(neighborNode)) {
-                    queue.add(neighborNode);
-                }
-            }
-        }
-    }
-
-    private int countDescendants(GraphNode node) {
-        int count = 0;
-        Set<GraphNode> visited = new HashSet<>();
-        Stack<GraphNode> stack = new Stack<>();
-
-        stack.push(node);
-        visited.add(node);
-
-        while (!stack.isEmpty()) {
-            GraphNode currentNode = stack.pop();
-
-            if (edgeMap.get(currentNode) != null) {
-                for (GraphEdge edge : edgeMap.get(currentNode)) {
-                    GraphNode childNode = edge.getDestinationNode();
-                    if (!visited.contains(childNode)) {
-                        count++;
-                        stack.push(childNode);
-                        visited.add(childNode);
-                    }
-                }
-            }
-        }
-        return count;
-    }
-
 //    public void computePriorities() {
-//        // find node that does not rely on any dependency as root node
+//        // Find nodes that do not rely on any dependency as root nodes
 //        List<GraphNode> rootList = new ArrayList<>();
 //        for (GraphNode node : edgeMap.keySet()) {
 //            if (node.getNumParents() == 0) {
 //                rootList.add(node);
 //            }
 //        }
+//
 //        if (!rootList.isEmpty()) {
 //            for (GraphNode rootNode : rootList) {
 //                computeMaxPriority(rootNode);
@@ -133,26 +56,103 @@ public class Scheduler {
 //        } else {
 //            System.out.println("Invalid dependency graph: no roots");
 //        }
+//
+//        // Calculate priority for each node
+//        for (GraphNode node : edgeMap.keySet()) {
+//            int descendantCount = countDescendants(node);
+//            int priority;
+//            if (node.getOpCode().equals("store")) {
+//                priority = 10 * node.getMaxLatencyPathValue() + descendantCount;
+//            } else {
+//                priority = 10 * node.getMaxLatencyPathValue() + descendantCount;
+//            }
+//
+//            node.setPriority(priority);
+//        }
 //    }
 //
 //    private void computeMaxPriority(GraphNode rootNode) {
 //        Queue<GraphNode> queue = new LinkedList<>();
+//        Set<GraphNode> visited = new HashSet<>();
 //        queue.add(rootNode);
 //        rootNode.setMaxLatencyPathValue(rootNode.getLatency());
-//        rootNode.setPriority(rootNode.getMaxLatencyPathValue());
+//
 //        while (!queue.isEmpty()) {
 //            GraphNode currNode = queue.poll();
+//            visited.add(currNode);
 //            int currentValue = currNode.getMaxLatencyPathValue();
-//            currNode.setPriority(currNode.getMaxLatencyPathValue());
+//
 //            for (GraphEdge neighbor : edgeMap.get(currNode)) {
 //                GraphNode neighborNode = neighbor.getDestinationNode();
 //                int potentialLatency = currentValue + neighborNode.getLatency();
 //                neighborNode.setMaxLatencyPathValue(potentialLatency);
-//                queue.add(neighborNode);
+//                if (!visited.contains(neighborNode)) {
+//                    queue.add(neighborNode);
+//                }
 //            }
 //        }
-////        targetNode.setPriority(targetNode.getMaxLatencyPathValue());
 //    }
+//
+//    private int countDescendants(GraphNode node) {
+//        int count = 0;
+//        Set<GraphNode> visited = new HashSet<>();
+//        Stack<GraphNode> stack = new Stack<>();
+//
+//        stack.push(node);
+//        visited.add(node);
+//
+//        while (!stack.isEmpty()) {
+//            GraphNode currentNode = stack.pop();
+//
+//            if (edgeMap.get(currentNode) != null) {
+//                for (GraphEdge edge : edgeMap.get(currentNode)) {
+//                    GraphNode childNode = edge.getDestinationNode();
+//                    if (!visited.contains(childNode)) {
+//                        count++;
+//                        stack.push(childNode);
+//                        visited.add(childNode);
+//                    }
+//                }
+//            }
+//        }
+//        return count;
+//    }
+//sdafkljjdskal;fadfsk;jl;kadsfkl;jfds
+    public void computePriorities() {
+        // find node that does not rely on any dependency as root node
+        List<GraphNode> rootList = new ArrayList<>();
+        for (GraphNode node : edgeMap.keySet()) {
+            if (node.getNumParents() == 0) {
+                rootList.add(node);
+            }
+        }
+        if (!rootList.isEmpty()) {
+            for (GraphNode rootNode : rootList) {
+                computeMaxPriority(rootNode);
+            }
+        } else {
+            System.out.println("Invalid dependency graph: no roots");
+        }
+    }
+
+    private void computeMaxPriority(GraphNode rootNode) {
+        Queue<GraphNode> queue = new LinkedList<>();
+        queue.add(rootNode);
+        rootNode.setMaxLatencyPathValue(rootNode.getLatency());
+        rootNode.setPriority(rootNode.getMaxLatencyPathValue());
+        while (!queue.isEmpty()) {
+            GraphNode currNode = queue.poll();
+            int currentValue = currNode.getMaxLatencyPathValue();
+            currNode.setPriority(currNode.getMaxLatencyPathValue());
+            for (GraphEdge neighbor : edgeMap.get(currNode)) {
+                GraphNode neighborNode = neighbor.getDestinationNode();
+                int potentialLatency = currentValue + neighborNode.getLatency();
+                neighborNode.setMaxLatencyPathValue(potentialLatency);
+                queue.add(neighborNode);
+            }
+        }
+//        targetNode.setPriority(targetNode.getMaxLatencyPathValue());
+    }
 
     private boolean isReady(GraphNode node, Set<GraphNode> active) {
         // Add all edges originating from node
@@ -227,10 +227,6 @@ public class Scheduler {
                 }
                 // add the skipped nodes back to the ready list
                 ready.addAll(skippedNodes);
-                // if we did an output then need to reset f1 boolean to add a nop
-//                if (this.didOutput) {
-//                    this.f1Available = true;
-//                }
                 if (f0Available) {
                     currOps[0] = nop;
                 }
@@ -239,12 +235,12 @@ public class Scheduler {
                 }
             }
             finalSchedule.add(currOps);
-//            String res = "[ " +
-//                    currOps[0].getOp() +
-//                    " ; " +
-//                    currOps[1].getOp() +
-//                    " ]";
-//            System.out.println(res);
+            String res = "[ " +
+                    currOps[0].getOp() +
+                    " ; " +
+                    currOps[1].getOp() +
+                    " ]";
+            System.out.println(res);
             currentCycle++;
 
             // Process active nodes
@@ -263,23 +259,6 @@ public class Scheduler {
             }
         }
 
-        // Print the final scheduler
-//        int cycle = 0;
-//        for (GraphNode[] i : finalSchedule) {
-//            StringBuilder resBuilder = new StringBuilder();
-//            if (this.debug) {
-//                resBuilder.append(cycle);
-//            }
-//            resBuilder.append("[ ");
-//            resBuilder.append(i[0].getOp());
-//            resBuilder.append(" ; ");
-//            resBuilder.append(i[1].getOp());
-//            resBuilder.append(" ]");
-//            String res = resBuilder.toString();
-//            System.out.println(res);
-//            cycle += 1;
-//        }
-//        System.out.println("cycles: "+cycle);
     }
 
     private Object[] canExecute(GraphNode node) {

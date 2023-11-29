@@ -49,22 +49,57 @@ public class ScheduleMain {
                 parser = new Parser(scanner);
                 error = parser.parse();
                 if (error == 0) {
+                    long startTime, endTime, duration;
+
+                    // Start timing
+                    startTime = System.nanoTime();
+
                     // the parse was successful and we can get the IR from the parser
                     IntermediateList representation = parser.getIRList();
+
+                    // End timing and print duration
+                    endTime = System.nanoTime();
+                    duration = endTime - startTime;
+//                    System.out.println("Time for parsing and getting IR: " + duration + " nanoseconds");
+
+                    startTime = System.nanoTime();
+
                     Renamer renamer = new Renamer(representation, parser.getMaxSourceReg());
                     renamer.addVirtualRegisters();
-//                    Allocator allocator = new Allocator(representation, numRegisters, renamer.getVrName(), renamer.getMaxLive());
-//                    allocator.allocate();
-//                    System.out.print(representation.getILoc());
-//                    System.out.println("--------------------------------------------");
+
+                    endTime = System.nanoTime();
+                    duration = endTime - startTime;
+//                    System.out.println("Time for renaming: " + duration + " nanoseconds");
+
+                    // Allocator and other commented out code
+
+                    startTime = System.nanoTime();
+
                     Grapher grapher = new Grapher(representation);
                     grapher.buildGraph();
 
+                    endTime = System.nanoTime();
+                    duration = endTime - startTime;
+//                    System.out.println("Time for building graph: " + duration + " nanoseconds");
+
+                    startTime = System.nanoTime();
+
                     Scheduler scheduler = new Scheduler(grapher.getNodeEdgeMap());
                     scheduler.computePriorities();
-//                    grapher.printGraph();
+
+                    endTime = System.nanoTime();
+                    duration = endTime - startTime;
+//                    System.out.println("Time for computing priorities: " + duration + " nanoseconds");
+
+                    startTime = System.nanoTime();
+
                     scheduler.createSchedule();
-//                    System.out.print(representation.getPRCode());
+
+                    endTime = System.nanoTime();
+                    duration = endTime - startTime;
+//                    System.out.println("Time for creating schedule: " + duration + " nanoseconds");
+
+
                 } else {
                     // there was an error in the parse
                     handleParseReturn(error, args[0]);
