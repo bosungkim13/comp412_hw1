@@ -7,7 +7,6 @@ import common.IntermediateRepresentation.IntermediateStoreNode;
 import sun.security.krb5.internal.HostAddress;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 public class Grapher {
     private IntermediateList IR;
@@ -171,7 +170,11 @@ public class Grapher {
             if (prevStore == null) {
                 return;
             }
-            List<GraphNode> children = edges.stream().map(GraphEdge::getDestinationNode).collect(Collectors.toList());
+            List<GraphNode> children = new ArrayList<>();
+            for (GraphEdge edge : edges) {
+                children.add(edge.getDestinationNode());
+            }
+
             if (!children.contains(prevStore)) {
                 GraphEdge edge = null;
                 if (currIsStore) {
@@ -221,7 +224,10 @@ public class Grapher {
                     edges.add(edge);
                     IR2graph.get(iterNode).addParent(currGraphNode);
                 } else if (currLex.equals("load")) {
-                    List<GraphNode> children = edges.stream().map(GraphEdge::getDestinationNode).collect(Collectors.toList());
+                    List<GraphNode> children = new ArrayList<>();
+                    for (GraphEdge edge : edges) {
+                        children.add(edge.getDestinationNode());
+                    }
                     if (!children.contains(this.IR2graph.get(iterNode))) {
                         GraphEdge edge = new GraphEdge(this.IR2graph.get(iterNode),"serial", 1);
                         edges.add(edge);
